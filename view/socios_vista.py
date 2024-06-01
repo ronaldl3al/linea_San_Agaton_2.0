@@ -1,8 +1,7 @@
-# vistas/socios_vista.py
-
 import flet as ft
 from controller.socios_controlador import SocioControlador
 from view.common.common import Common
+import mysql.connector.errors
 
 class SociosPage(ft.View):
     def __init__(self, page):
@@ -19,16 +18,19 @@ class SociosPage(ft.View):
                 leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
                 actions=[Common.crear_botones_navegacion(self.page)]
             ),
-            ft.Column(
-                [
-                    self.tabla_socios,
-                    ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
-                ],
+            ft.Container(
+                content=ft.ListView(
+                    controls=[self.tabla_socios],
+                    expand=True,
+                    spacing=10,
+                    padding=20,
+                    auto_scroll=True
+                ),
                 expand=True
-            )
+            ),
+            ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
         ]
 
-        # Inicializa el BottomSheet vacío
         self.bottom_sheet = ft.BottomSheet(
             ft.Container(),
             open=False,
@@ -108,18 +110,35 @@ class SociosPage(ft.View):
         self.page.update()
 
     def guardar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
-        self.socio_controlador.insertar_socio(cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento)
-        self.mostrar_snackbar("Socio agregado correctamente")
-        self.refrescar_datos()
+        try:
+            if not cedula or not nombres or not apellidos:
+                raise ValueError("Los campos 'Cédula', 'Nombres' y 'Apellidos' son obligatorios.")
+            self.socio_controlador.insertar_socio(cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento)
+            self.mostrar_snackbar("Socio agregado correctamente")
+            self.refrescar_datos()
+        except ValueError as ve:
+            self.mostrar_snackbar(f"Error de validación: {ve}")
+        except mysql.connector.Error as err:
+            self.mostrar_snackbar(f"Error de base de datos: {err}")
 
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
-        self.socio_controlador.actualizar_socio(cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento)
-        self.mostrar_snackbar("Socio actualizado correctamente")
-        self.refrescar_datos()
+        try:
+            if not cedula or not nombres or not apellidos:
+                raise ValueError("Los campos 'Cédula', 'Nombres' y 'Apellidos' son obligatorios.")
+            self.socio_controlador.actualizar_socio(cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento)
+            self.mostrar_snackbar("Socio actualizado correctamente")
+            self.refrescar_datos()
+        except ValueError as ve:
+            self.mostrar_snackbar(f"Error de validación: {ve}")
+        except mysql.connector.Error as err:
+            self.mostrar_snackbar(f"Error de base de datos: {err}")
 
     def eliminar_socio(self, cedula):
-        self.socio_controlador.eliminar_socio(cedula)
-        self.mostrar_snackbar("Socio eliminado correctamente")
+        try:
+            self.socio_controlador.eliminar_socio(cedula)
+            self.mostrar_snackbar("Socio eliminado correctamente")
+        except mysql.connector.errors.IntegrityError:
+            self.mostrar_snackbar("No puedes eliminar este socio sin primero eliminar los vehículos asociados.")
         self.refrescar_datos()
 
     def mostrar_snackbar(self, mensaje):
@@ -156,21 +175,19 @@ class SociosPage(ft.View):
         self.page.update()
 
     def crear_formulario_socio(self, titulo, accion, socio=None):
-          # Ajustar la altura según sea necesario
 
-        # Creación de campos del formulario
         cedula = ft.TextField(label="Cédula", value=socio['cedula'] if socio else "")
         nombres = ft.TextField(label="Nombres", value=socio['nombres'] if socio else "")
         apellidos = ft.TextField(label="Apellidos", value=socio['apellidos'] if socio else "")
-        direccion = ft.TextField(label="Dirección", value=socio['direccion'] if socio else "", multiline= True)
+        direccion = ft.TextField(label="Dirección", value=socio['direccion'] if socio else "", multiline=True)
         telefono = ft.TextField(label="Teléfono", value=socio['numero_telefono'] if socio else "")
         control = ft.TextField(label="Control", value=socio['numero_control'] if socio else "")
         rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "")
         fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/dd/mm", value=socio['fecha_nacimiento'] if socio else "")
 
-        # Crear el formulario como una variable
-        formulario = ft.Container(
+        return ft.Container(
             ft.Column([
+
                 ft.Row([cedula, nombres], spacing=10),
                 ft.Row([apellidos, direccion], spacing=10),
                 ft.Row([telefono, control], spacing=10),
@@ -191,5 +208,3 @@ class SociosPage(ft.View):
 
         # Devolver el formulario como una variable
         return formulario
-
-
