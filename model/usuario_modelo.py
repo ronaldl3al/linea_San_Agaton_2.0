@@ -1,10 +1,10 @@
 # modelos/usuario_modelo.py
 
-from utils.db_config import ConfiguracionBaseDatos
+from utils.db_config import ConfiguracionBaseDeDatos
 
 class UsuarioModelo:
     def __init__(self):
-        self.db_config = ConfiguracionBaseDatos()
+        self.db_config = ConfiguracionBaseDeDatos()
 
     def obtener_usuario(self, nombre_usuario, contrasena):
         conexion = self.db_config.conectar()

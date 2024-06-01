@@ -23,10 +23,7 @@ class MenuPage(ft.View):
                             ft.TextButton("SANCIONES", icon=ft.icons.BLOCK, on_click=lambda _: self.page.go("/sanciones")),
                             ft.VerticalDivider(),
                             ft.TextButton("FINANZAS", icon=ft.icons.ATTACH_MONEY, on_click=lambda _: self.page.go("/finanzas")),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
+                            ft.VerticalDivider(width=106)
                         ],
                     ),
                     ft.PopupMenuButton(
