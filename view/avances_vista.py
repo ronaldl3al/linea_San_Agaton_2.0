@@ -1,16 +1,16 @@
-# vistas/menu_vista.py
+# vistas/avances_vista.py
 
 import flet as ft
 
-class MenuPage(ft.View):
+class AvancesPage(ft.View):
     def __init__(self, page):
-        super().__init__(route="/menu")
+        super().__init__(route="/avances")
         self.page = page
-
         self.controls = [
             ft.AppBar(
-                title=ft.Text("LINEA SAN AGATON"),
+                title=ft.Text("Avances"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
+                leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
                 actions=[
                     ft.Row(
                         [
@@ -23,24 +23,12 @@ class MenuPage(ft.View):
                             ft.TextButton("SANCIONES", icon=ft.icons.BLOCK, on_click=lambda _: self.page.go("/sanciones")),
                             ft.VerticalDivider(),
                             ft.TextButton("FINANZAS", icon=ft.icons.ATTACH_MONEY, on_click=lambda _: self.page.go("/finanzas")),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
-                            ft.VerticalDivider(),
+                            ft.VerticalDivider(width=143),
                         ],
-                    ),
-                    ft.PopupMenuButton(
-                        items=[
-                            ft.PopupMenuItem(text="Cerrar Sesión", on_click=lambda _: self.logout()),
-                        ]
+                        alignment=ft.MainAxisAlignment.CENTER
                     )
                 ]
             ),
-            ft.Text("Bienvenido al menú principal! Selecciona una opción del menú."),
+            ft.Text("Aquí puedes ver los avances.")
         ]
 
-    def logout(self, e=None):
-        self.page.go("/login")
-
-    
-    
