@@ -2,6 +2,7 @@
 
 import flet as ft
 from controller.socios_controlador import SocioControlador
+from view.common.common import Common
 
 class SociosPage(ft.View):
     def __init__(self, page):
@@ -16,23 +17,7 @@ class SociosPage(ft.View):
                 title=ft.Text("Socios"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
                 leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
-                actions=[
-                    ft.Row(
-                        [
-                            ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE, on_click=lambda _: self.page.go("/socios")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI, on_click=lambda _: self.page.go("/vehiculos")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("AVANCES", icon=ft.icons.WORK, on_click=lambda _: self.page.go("/avances")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("SANCIONES", icon=ft.icons.BLOCK, on_click=lambda _: self.page.go("/sanciones")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("FINANZAS", icon=ft.icons.ATTACH_MONEY, on_click=lambda _: self.page.go("/finanzas")),
-                            ft.VerticalDivider(width=143),
-                        ],
-                        alignment=ft.MainAxisAlignment.CENTER
-                    )
-                ]
+                actions=[Common.crear_botones_navegacion(self.page)]
             ),
             ft.Column(
                 [
@@ -171,18 +156,20 @@ class SociosPage(ft.View):
         self.page.update()
 
     def crear_formulario_socio(self, titulo, accion, socio=None):
-        height = 40  # Ajustar la altura según sea necesario
+          # Ajustar la altura según sea necesario
 
-        cedula = ft.TextField(label="Cédula", value=socio['cedula'] if socio else "", height=height)
-        nombres = ft.TextField(label="Nombres", value=socio['nombres'] if socio else "", height=height)
-        apellidos = ft.TextField(label="Apellidos", value=socio['apellidos'] if socio else "", height=height)
-        direccion = ft.TextField(label="Dirección", value=socio['direccion'] if socio else "", height=height)
-        telefono = ft.TextField(label="Teléfono", value=socio['numero_telefono'] if socio else "", height=height)
-        control = ft.TextField(label="Control", value=socio['numero_control'] if socio else "", height=height)
-        rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "", height=height)
-        fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", value=socio['fecha_nacimiento'] if socio else "", height=height)
+        # Creación de campos del formulario
+        cedula = ft.TextField(label="Cédula", value=socio['cedula'] if socio else "")
+        nombres = ft.TextField(label="Nombres", value=socio['nombres'] if socio else "")
+        apellidos = ft.TextField(label="Apellidos", value=socio['apellidos'] if socio else "")
+        direccion = ft.TextField(label="Dirección", value=socio['direccion'] if socio else "", multiline= True)
+        telefono = ft.TextField(label="Teléfono", value=socio['numero_telefono'] if socio else "")
+        control = ft.TextField(label="Control", value=socio['numero_control'] if socio else "")
+        rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "")
+        fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/dd/mm", value=socio['fecha_nacimiento'] if socio else "")
 
-        return ft.Container(
+        # Crear el formulario como una variable
+        formulario = ft.Container(
             ft.Column([
                 ft.Row([cedula, nombres], spacing=10),
                 ft.Row([apellidos, direccion], spacing=10),
@@ -201,4 +188,8 @@ class SociosPage(ft.View):
             padding=20,
             border_radius=15,
         )
+
+        # Devolver el formulario como una variable
+        return formulario
+
 
