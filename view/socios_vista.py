@@ -1,7 +1,8 @@
-import flet as ft
+import flet as ft 
 from controller.socios_controlador import SocioControlador
 from view.common.common import Common
 import mysql.connector.errors
+
 
 class SociosPage(ft.View):
     def __init__(self, page):
@@ -9,7 +10,7 @@ class SociosPage(ft.View):
         self.page = page
         self.socio_controlador = SocioControlador()
         self.socios_data = self.obtener_datos_socios()
-        self.tabla_socios = self.crear_tabla_socios()
+        self.tabla_socios = SociosTable(self, self.socios_data)
         
         self.controls = [
             ft.AppBar(
@@ -20,7 +21,7 @@ class SociosPage(ft.View):
             ),
             ft.Container(
                 content=ft.ListView(
-                    controls=[self.tabla_socios],
+                    controls=[self.tabla_socios.data_table],
                     expand=True,
                     spacing=10,
                     padding=20,
@@ -41,51 +42,13 @@ class SociosPage(ft.View):
     def obtener_datos_socios(self):
         return self.socio_controlador.obtener_todos_socios()
 
-    def crear_tabla_socios(self):
-        socios = self.obtener_datos_socios()
-        return ft.DataTable(
-            columns=[
-                ft.DataColumn(ft.Text("Cédula")),
-                ft.DataColumn(ft.Text("Nombres")),
-                ft.DataColumn(ft.Text("Apellidos")),
-                ft.DataColumn(ft.Text("Dirección")),
-                ft.DataColumn(ft.Text("Teléfono")),
-                ft.DataColumn(ft.Text("Control")),
-                ft.DataColumn(ft.Text("RIF")),
-                ft.DataColumn(ft.Text("Fecha Nacimiento")),
-                ft.DataColumn(ft.Text("Acciones"))
-            ],
-            rows=[
-                ft.DataRow(
-                    cells=[
-                        ft.DataCell(ft.Text(socio['cedula'])),
-                        ft.DataCell(ft.Text(socio['nombres'])),
-                        ft.DataCell(ft.Text(socio['apellidos'])),
-                        ft.DataCell(ft.Text(socio['direccion'])),
-                        ft.DataCell(ft.Text(socio['numero_telefono'])),
-                        ft.DataCell(ft.Text(socio['numero_control'])),
-                        ft.DataCell(ft.Text(socio['rif'])),
-                        ft.DataCell(ft.Text(socio['fecha_nacimiento'])),
-                        ft.DataCell(
-                            ft.Row(
-                                [
-                                    ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.mostrar_bottomsheet_editar(s)),
-                                    ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.confirmar_eliminar_socio(s))
-                                ]
-                            )
-                        )
-                    ],
-                ) for socio in socios
-            ],
-        )
-
     def mostrar_bottomsheet_agregar(self, e):
-        self.bottom_sheet.content = self.crear_formulario_socio("Agregar Socio", self.guardar_socio)
+        self.bottom_sheet.content = SociosForm(self, "Agregar Socio", self.guardar_socio).formulario
         self.bottom_sheet.open = True
         self.page.update()
 
     def mostrar_bottomsheet_editar(self, socio):
-        self.bottom_sheet.content = self.crear_formulario_socio("Editar Socio", self.actualizar_socio, socio)
+        self.bottom_sheet.content = SociosForm(self, "Editar Socio", self.actualizar_socio, socio).formulario
         self.bottom_sheet.open = True
         self.page.update()
 
@@ -148,7 +111,36 @@ class SociosPage(ft.View):
 
     def refrescar_datos(self):
         self.socios_data = self.obtener_datos_socios()
-        self.tabla_socios.rows = [
+        self.tabla_socios.actualizar_filas(self.socios_data)
+        self.cerrar_bottomsheet()
+        self.page.update()
+    
+    
+
+
+class SociosTable:
+    def __init__(self, socios_page, socios_data):
+        self.socios_page = socios_page
+        self.data_table = self.crear_tabla_socios(socios_data)
+
+    def crear_tabla_socios(self, socios):
+        return ft.DataTable(
+            columns=[
+                ft.DataColumn(ft.Text("Cédula")),
+                ft.DataColumn(ft.Text("Nombres")),
+                ft.DataColumn(ft.Text("Apellidos")),
+                ft.DataColumn(ft.Text("Dirección")),
+                ft.DataColumn(ft.Text("Teléfono")),
+                ft.DataColumn(ft.Text("Control")),
+                ft.DataColumn(ft.Text("RIF")),
+                ft.DataColumn(ft.Text("Fecha Nacimiento")),
+                ft.DataColumn(ft.Text("Acciones"))
+            ],
+            rows=self.crear_filas(socios),
+        )
+
+    def crear_filas(self, socios):
+        return [
             ft.DataRow(
                 cells=[
                     ft.DataCell(ft.Text(socio['cedula'])),
@@ -162,20 +154,26 @@ class SociosPage(ft.View):
                     ft.DataCell(
                         ft.Row(
                             [
-                                ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.mostrar_bottomsheet_editar(s)),
-                                ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.confirmar_eliminar_socio(s))
+                                ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.socios_page.mostrar_bottomsheet_editar(s)),
+                                ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.socios_page.confirmar_eliminar_socio(s))
                             ]
                         )
                     )
                 ],
-            ) for socio in self.socios_data
+            ) for socio in socios
         ]
-        self.tabla_socios.update()
-        self.cerrar_bottomsheet()
-        self.page.update()
+
+    def actualizar_filas(self, socios):
+        self.data_table.rows = self.crear_filas(socios)
+        self.data_table.update()
+
+
+class SociosForm:
+    def __init__(self, socios_page, titulo, accion, socio=None):
+        self.socios_page = socios_page
+        self.formulario = self.crear_formulario_socio(titulo, accion, socio)
 
     def crear_formulario_socio(self, titulo, accion, socio=None):
-
         cedula = ft.TextField(label="Cédula", value=socio['cedula'] if socio else "")
         nombres = ft.TextField(label="Nombres", value=socio['nombres'] if socio else "")
         apellidos = ft.TextField(label="Apellidos", value=socio['apellidos'] if socio else "")
@@ -185,16 +183,15 @@ class SociosPage(ft.View):
         rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "")
         fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/dd/mm", value=socio['fecha_nacimiento'] if socio else "")
 
-        return ft.Container(
+        formulario = ft.Container(
             ft.Column([
-
                 ft.Row([cedula, nombres], spacing=10),
                 ft.Row([apellidos, direccion], spacing=10),
                 ft.Row([telefono, control], spacing=10),
                 ft.Row([rif, fecha_nacimiento], spacing=10),
                 ft.Row(
                     [
-                        ft.TextButton("Cancelar", on_click=lambda _: self.cerrar_bottomsheet()),
+                        ft.TextButton("Cancelar", on_click=lambda _: self.socios_page.cerrar_bottomsheet()),
                         ft.TextButton("Guardar", on_click=lambda _: accion(
                             cedula.value, nombres.value, apellidos.value, direccion.value, telefono.value, control.value, rif.value, fecha_nacimiento.value
                         ))
@@ -206,5 +203,4 @@ class SociosPage(ft.View):
             border_radius=15,
         )
 
-        # Devolver el formulario como una variable
         return formulario

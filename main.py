@@ -8,6 +8,8 @@ from view.vehiculos_vista import VehiculosPage
 from view.avances_vista import AvancesPage
 from view.sanciones_vista import SancionesPage
 from view.finanzas_vista import FinanzasPage
+import warnings
+warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 def main(page: ft.Page):
     def route_change(route):
