@@ -1,5 +1,3 @@
-# vistas/menu_vista.py
-
 import flet as ft
 
 class MenuPage(ft.View):
@@ -33,11 +31,15 @@ class MenuPage(ft.View):
                     )
                 ]
             ),
-            ft.Text("Bienvenido al menú principal! Selecciona una opción del menú."),
+            ft.Container(
+                content=ft.Text("Bienvenido al menú principal! Selecciona una opción del menú."),
+                expand=True,
+                alignment=ft.alignment.center,
+                bgcolor=ft.colors.with_opacity(0.8, ft.colors.WHITE),  # Optional: to make text more readable
+                image_src="image\image_fondo.jpg",
+                image_fit=ft.ImageFit.COVER
+            )
         ]
 
     def logout(self, e=None):
         self.page.go("/login")
-
-    
-    

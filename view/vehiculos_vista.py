@@ -2,6 +2,25 @@ import flet as ft
 from controller.vehiculo_controlador import VehiculoControlador
 from view.common.common import Common
 import mysql.connector.errors
+from fpdf import FPDF
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Tabla de Datos de Vehículos', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+    def cell_with_multiline(self, w, h, text, border=0, ln=0, align='', fill=False):
+        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
+        for line in lines:
+            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
+            border = 0  # Only border the first line
+        if ln > 0:
+            self.ln(h)
 
 
 class VehiculosPage(ft.View):
@@ -17,7 +36,10 @@ class VehiculosPage(ft.View):
                 title=ft.Text("Vehículos"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
                 leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
-                actions=[Common.crear_botones_navegacion(self.page)]
+                actions=[
+                    Common.crear_botones_navegacion(self.page),
+                    ft.IconButton(icon=ft.icons.PICTURE_AS_PDF, on_click=self.exportar_pdf)
+                ]
             ),
             ft.Container(
                 content=ft.ListView(
@@ -115,6 +137,30 @@ class VehiculosPage(ft.View):
         self.cerrar_bottomsheet()
         self.page.update()
 
+    def exportar_pdf(self, e):
+        pdf = PDF(orientation='L', unit='mm', format='A4')
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, txt="Reporte de Vehículos", ln=True, align='C')
+        
+        pdf.ln(10)  # Espacio debajo del título
+        
+        # Data rows
+        for vehiculo in self.vehiculos_data:
+            pdf.set_font("Arial", size=14)
+            pdf.cell(0, 10, txt=f"ID Vehículo: {vehiculo['ID_vehiculo']}", ln=True)
+            pdf.set_font("Arial", 'B', size=10)
+            pdf.cell(0, 10, txt=f"Cédula: {vehiculo['cedula']}", ln=True)
+            pdf.cell(0, 10, txt=f"Número de Control: {vehiculo['numero_control']}", ln=True)
+            pdf.cell(0, 10, txt=f"Marca: {vehiculo['marca']}", ln=True)
+            pdf.cell(0, 10, txt=f"Modelo: {vehiculo['modelo']}", ln=True)
+            pdf.cell(0, 10, txt=f"Año: {vehiculo['ano']}", ln=True)
+            pdf.cell(0, 10, txt=f"Placa: {vehiculo['Placa']}", ln=True)
+            
+            pdf.ln(5)  # Espacio entre registros de vehículos
+        
+        pdf.output("reporte_vehiculos.pdf")
+        self.mostrar_snackbar("PDF generado correctamente")
 
 class VehiculosTable:
     def __init__(self, vehiculos_page, vehiculos_data):

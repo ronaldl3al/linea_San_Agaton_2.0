@@ -2,6 +2,27 @@ import flet as ft
 from controller.socios_controlador import SocioControlador
 from view.common.common import Common
 import mysql.connector.errors
+from fpdf import FPDF
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Tabla de Datos de Socios', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+    def cell_with_multiline(self, w, h, text, border=0, ln=0, align='', fill=False):
+        # Split text into lines
+        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
+        for line in lines:
+            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
+            border = 0  # Only border the first line
+        if ln > 0:
+            self.ln(h)
+
 
 
 class SociosPage(ft.View):
@@ -17,7 +38,10 @@ class SociosPage(ft.View):
                 title=ft.Text("Socios"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
                 leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
-                actions=[Common.crear_botones_navegacion(self.page)]
+                actions=[
+                    Common.crear_botones_navegacion(self.page),
+                    ft.IconButton(icon=ft.icons.PICTURE_AS_PDF, on_click=self.exportar_pdf)
+                ]
             ),
             ft.Container(
                 content=ft.ListView(
@@ -86,7 +110,7 @@ class SociosPage(ft.View):
 
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         try:
-            if not cedula or not nombres or not apellidos:
+            if not cedula or not apellidos or not nombres:
                 raise ValueError("Los campos 'Cédula', 'Nombres' y 'Apellidos' son obligatorios.")
             self.socio_controlador.actualizar_socio(cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento)
             self.mostrar_snackbar("Socio actualizado correctamente")
@@ -114,8 +138,35 @@ class SociosPage(ft.View):
         self.tabla_socios.actualizar_filas(self.socios_data)
         self.cerrar_bottomsheet()
         self.page.update()
-    
-    
+
+    def exportar_pdf(self, e):
+        pdf = PDF(orientation='L', unit='mm', format='A4')
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, txt="Reporte de Socios", ln=True, align='C')
+        
+        pdf.ln(10)  # Espacio debajo del título
+        
+        # Data rows
+        for socio in self.socios_data:
+            pdf.set_font("Arial", size=14)
+            pdf.cell(0, 10, txt=f"Control: {socio['numero_control']}", ln=True)
+            pdf.set_font("Arial", 'B', size=10)
+            pdf.cell(0, 10, txt=f"Cédula: {socio['cedula']}", ln=True)
+            pdf.cell(0, 10, txt=f"Nombres: {socio['nombres']}", ln=True)
+            pdf.cell(0, 10, txt=f"Apellidos: {socio['apellidos']}", ln=True)
+            pdf.cell(0, 10, txt=f"Dirección: {socio['direccion']}", ln=True)
+            pdf.cell(0, 10, txt=f"Teléfono: {socio['numero_telefono']}", ln=True)
+            pdf.cell(0, 10, txt=f"RIF: {socio['rif']}", ln=True)
+            pdf.cell(0, 10, txt=f"Fecha Nacimiento: {socio['fecha_nacimiento']}", ln=True)
+            
+            pdf.ln(5)  # Espacio entre registros de socios
+            pdf.ln(5)  # Espacio entre registros de socios
+        
+        pdf.output("reporte_socios.pdf")
+        self.mostrar_snackbar("PDF generado correctamente")
+
+
 
 
 class SociosTable:
@@ -166,7 +217,6 @@ class SociosTable:
     def actualizar_filas(self, socios):
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
-
 
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
