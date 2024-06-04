@@ -6,40 +6,122 @@ class MenuPage(ft.View):
         self.page = page
 
         self.controls = [
-            ft.AppBar(
-                title=ft.Text("LINEA SAN AGATON"),
-                bgcolor=ft.colors.SURFACE_VARIANT,
-                actions=[
-                    ft.Row(
-                        [
-                            ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE, on_click=lambda _: self.page.go("/socios")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI, on_click=lambda _: self.page.go("/vehiculos")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("AVANCES", icon=ft.icons.WORK, on_click=lambda _: self.page.go("/avances")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("SANCIONES", icon=ft.icons.BLOCK, on_click=lambda _: self.page.go("/sanciones")),
-                            ft.VerticalDivider(),
-                            ft.TextButton("FINANZAS", icon=ft.icons.ATTACH_MONEY, on_click=lambda _: self.page.go("/finanzas")),
-                            ft.VerticalDivider(width=106)
-                        ],
-                    ),
-                    ft.PopupMenuButton(
-                        items=[
-                            ft.PopupMenuItem(text="Cerrar Sesión", on_click=lambda _: self.logout()),
-                        ]
-                    )
-                ]
-            ),
             ft.Container(
-                content=ft.Text("Bienvenido al menú principal! Selecciona una opción del menú."),
+                content=ft.Column(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text("LINEA SAN AGATON", size=40, weight=ft.FontWeight.W_900),
+                                ft.OutlinedButton(
+                                    on_click=self.logout,
+                                    text="Cerrar Sesión",
+                                    icon=ft.icons.LOGOUT,
+                                    style=ft.ButtonStyle(
+                                        shape=ft.RoundedRectangleBorder(radius=10),
+                                        bgcolor="red"
+                                    )
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.CENTER,
+                            spacing=650
+                        ),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.icons.PEOPLE, size=50, color="white"),
+                                    ft.Text("SOCIOS", size=20, weight=ft.FontWeight.W_900, color="white"),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                            ),
+                            alignment=ft.alignment.center,
+                            width=350,
+                            height=80,
+                            border_radius=10,
+                            ink=True,
+                            on_click=lambda e: self.page.go("/socios"),
+                            bgcolor="blue",
+                            margin=ft.margin.all(10)
+                        ),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.icons.LOCAL_TAXI, size=50, color="white"),
+                                    ft.Text("VEHICULOS", size=20, weight=ft.FontWeight.W_900, color="white"),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                            ),
+                            alignment=ft.alignment.center,
+                            width=350,
+                            height=80,
+                            border_radius=10,
+                            ink=True,
+                            on_click=lambda e: self.page.go("/vehiculos"),
+                            bgcolor="blue",
+                            margin=ft.margin.all(10)
+                        ),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.icons.WORK, size=50, color="white"),
+                                    ft.Text("AVANCES", size=20, weight=ft.FontWeight.W_900, color="white"),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                            ),
+                            alignment=ft.alignment.center,
+                            width=350,
+                            height=80,
+                            border_radius=10,
+                            ink=True,
+                            on_click=lambda e: self.page.go("/avances"),
+                            bgcolor="blue",
+                            margin=ft.margin.all(10)
+                        ),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.icons.BLOCK, size=50, color="white"),
+                                    ft.Text("SANCIONES", size=20, weight=ft.FontWeight.W_900, color="white"),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                            ),
+                            alignment=ft.alignment.center,
+                            width=350,
+                            height=80,
+                            border_radius=10,
+                            ink=True,
+                            on_click=lambda e: self.page.go("/sanciones"),
+                            bgcolor="blue",
+                            margin=ft.margin.all(10)
+                        ),
+                        ft.Container(
+                            content=ft.Row(
+                                [
+                                    ft.Icon(ft.icons.ATTACH_MONEY, size=50, color="white"),
+                                    ft.Text("FINANZAS", size=20, weight=ft.FontWeight.W_900, color="white"),
+                                ],
+                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                            ),
+                            alignment=ft.alignment.center,
+                            width=350,
+                            height=80,
+                            border_radius=10,
+                            ink=True,
+                            on_click=lambda e: self.page.go("/finanzas"),
+                            bgcolor="blue",
+                            margin=ft.margin.all(10)
+                        ),
+                    ],
+                    alignment=ft.MainAxisAlignment.CENTER,
+                    
+                ),
                 expand=True,
                 alignment=ft.alignment.center,
-                bgcolor=ft.colors.with_opacity(0.8, ft.colors.WHITE),  # Optional: to make text more readable
-                image_src="image\image_fondo.jpg",
-                image_fit=ft.ImageFit.COVER
+                bgcolor="#333333",
+                margin=5,
+                border_radius=20
             )
         ]
 
-    def logout(self, e=None):
+    def logout(self, e):
         self.page.go("/login")
+

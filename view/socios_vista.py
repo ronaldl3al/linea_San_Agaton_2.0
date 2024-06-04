@@ -24,7 +24,6 @@ class PDF(FPDF):
             self.ln(h)
 
 
-
 class SociosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/socios")
@@ -104,9 +103,9 @@ class SociosPage(ft.View):
             self.mostrar_snackbar("Socio agregado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         try:
@@ -116,21 +115,36 @@ class SociosPage(ft.View):
             self.mostrar_snackbar("Socio actualizado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def eliminar_socio(self, cedula):
         try:
             self.socio_controlador.eliminar_socio(cedula)
             self.mostrar_snackbar("Socio eliminado correctamente")
         except mysql.connector.errors.IntegrityError:
-            self.mostrar_snackbar("No puedes eliminar este socio sin primero eliminar los vehículos asociados.")
+            self.mostrar_banner("No puedes eliminar este socio sin primero eliminar los vehículos asociados.")
         self.refrescar_datos()
 
     def mostrar_snackbar(self, mensaje):
         self.page.snack_bar = ft.SnackBar(ft.Text(mensaje))
         self.page.snack_bar.open = True
+        self.page.update()
+
+    def mostrar_banner(self, mensaje):
+        self.page.banner = ft.Banner(
+            content=ft.Text(mensaje, color=ft.colors.WHITE),
+            bgcolor="#eb3936",  # Color rojo pastel
+            actions=[
+                ft.TextButton("CERRAR", on_click=lambda _: self.cerrar_banner(), style=ft.ButtonStyle(color=ft.colors.WHITE))
+            ]
+        )
+        self.page.banner.open = True
+        self.page.update()
+
+    def cerrar_banner(self):
+        self.page.banner.open = False
         self.page.update()
 
     def refrescar_datos(self):
@@ -165,8 +179,6 @@ class SociosPage(ft.View):
         
         pdf.output("reporte_socios.pdf")
         self.mostrar_snackbar("PDF generado correctamente")
-
-
 
 
 class SociosTable:
@@ -218,6 +230,7 @@ class SociosTable:
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
 
+
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
         self.socios_page = socios_page
@@ -231,7 +244,7 @@ class SociosForm:
         telefono = ft.TextField(label="Teléfono", value=socio['numero_telefono'] if socio else "")
         control = ft.TextField(label="Control", value=socio['numero_control'] if socio else "")
         rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "")
-        fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/dd/mm", value=socio['fecha_nacimiento'] if socio else "")
+        fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/mm/dd", value=socio['fecha_nacimiento'] if socio else "")
 
         formulario = ft.Container(
             ft.Column([
