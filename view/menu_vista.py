@@ -6,21 +6,28 @@ class MenuPage(ft.View):
         self.page = page
 
         self.controls = [
+            ft.AppBar(
+                title=ft.Text("Inicio"),
+                bgcolor=ft.colors.SURFACE_VARIANT,
+                actions=[
+                    Botones_nav.crear_botones_navegacion(self.page),
+                    ft.PopupMenuButton(
+                        items=[
+                            ft.PopupMenuItem(
+                                text="Cerrar Sesión",
+                                icon=ft.icons.LOGOUT,
+                                on_click=self.show_logout_popup,
+                            )
+                        ]
+                    )
+                ]
+            ),
             ft.Container(
                 content=ft.Column(
                     [
                         ft.Row(
                             [
                                 ft.Text("LINEA SAN AGATON", size=40, weight=ft.FontWeight.W_900),
-                                ft.OutlinedButton(
-                                    on_click=self.logout,
-                                    text="Cerrar Sesión",
-                                    icon=ft.icons.LOGOUT,
-                                    style=ft.ButtonStyle(
-                                        shape=ft.RoundedRectangleBorder(radius=10),
-                                        bgcolor="red"
-                                    )
-                                )
                             ],
                             alignment=ft.MainAxisAlignment.CENTER,
                             spacing=650
@@ -31,7 +38,7 @@ class MenuPage(ft.View):
                                     ft.Icon(ft.icons.PEOPLE, size=50, color="white"),
                                     ft.Text("SOCIOS", size=20, weight=ft.FontWeight.W_900, color="white"),
                                 ],
-                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
+                                alignment=ft.MainAxisAlignment.START,
                             ),
                             alignment=ft.alignment.center,
                             width=350,
@@ -122,6 +129,39 @@ class MenuPage(ft.View):
             )
         ]
 
+    def show_logout_popup(self, e):
+        self.page.dialog = ft.AlertDialog(
+            title=ft.Text("Confirmar Cierre de Sesión"),
+            content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="red")),
+                ft.TextButton("Cerrar Sesión", on_click=self.logout),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.page.dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+
     def logout(self, e):
+        self.page.dialog.open = False
+        self.page.update()
         self.page.go("/login")
 
+class Botones_nav:
+    def crear_botones_navegacion(page):
+        return ft.Row(
+            [
+                ft.TextButton("INICIO", icon=ft.icons.HOME, on_click=lambda _: page.go("/menu")),
+                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
+                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.TextButton("AVANCES", icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=100),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )

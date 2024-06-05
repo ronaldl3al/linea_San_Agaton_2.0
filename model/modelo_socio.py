@@ -9,7 +9,7 @@ class ModeloSocio:
     def obtener_todos_socios(self):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM socio"
+        query = "SELECT * FROM socio  ORDER BY numero_control ASC "
         cursor.execute(query)
         socios = cursor.fetchall()
         cursor.close()
@@ -21,8 +21,7 @@ class ModeloSocio:
         cursor = conexion.cursor()
         query = """
         INSERT INTO socio (cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-        """
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query, (cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento))
         conexion.commit()
         cursor.close()

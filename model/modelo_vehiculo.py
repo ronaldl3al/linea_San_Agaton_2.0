@@ -9,7 +9,7 @@ class ModeloVehiculo:
     def obtener_todos_vehiculos(self):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM vehiculos"
+        query = "SELECT * FROM vehiculos ORDER BY numero_control ASC"
         cursor.execute(query)
         vehiculos = cursor.fetchall()
         cursor.close()

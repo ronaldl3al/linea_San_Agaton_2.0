@@ -1,8 +1,8 @@
 import flet as ft 
 from controller.socios_controlador import SocioControlador
-from view.common.common import Common
 import mysql.connector.errors
 from fpdf import FPDF
+from controller.auth_controlador import AuthControlador
 
 class PDF(FPDF):
     def header(self):
@@ -23,7 +23,6 @@ class PDF(FPDF):
         if ln > 0:
             self.ln(h)
 
-
 class SociosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/socios")
@@ -32,27 +31,64 @@ class SociosPage(ft.View):
         self.socios_data = self.obtener_datos_socios()
         self.tabla_socios = SociosTable(self, self.socios_data)
         
+        # Obtener el rol del usuario autenticado
+        self.rol = AuthControlador.obtener_rol()
+
+        # Definir el botón de agregar en una variable dependiendo del rol
+        btn_agregar = None
+        if self.rol in ["Admin", "Editor"]:  # Asumiendo roles en mayúsculas como en la base de datos
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+        elif self.rol == "Viewer":
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
+
+        # Añadir controles
         self.controls = [
             ft.AppBar(
                 title=ft.Text("Socios"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
-                leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
                 actions=[
-                    Common.crear_botones_navegacion(self.page),
-                    ft.IconButton(icon=ft.icons.PICTURE_AS_PDF, on_click=self.exportar_pdf)
+                    Botones_nav.crear_botones_navegacion(self.page),
+                    ft.PopupMenuButton(
+                        items=[
+                            ft.PopupMenuItem(
+                                text="Exportar PDF",
+                                icon=ft.icons.PICTURE_AS_PDF,
+                                on_click=self.exportar_pdf,
+                            ),
+                            ft.PopupMenuItem(
+                                text="Cerrar Sesión",
+                                icon=ft.icons.LOGOUT,
+                                on_click=self.show_logout_popup,
+                            )
+                        ]
+                    )
                 ]
             ),
             ft.Container(
-                content=ft.ListView(
-                    controls=[self.tabla_socios.data_table],
+                content=ft.Column(
+                    [
+                        ft.ListView(
+                            controls=[self.tabla_socios.data_table],
+                            expand=True,
+                            spacing=10,
+                            padding=20,
+                            auto_scroll=True
+                        ),
+                        ft.Row(
+                            [btn_agregar] if btn_agregar else [],  # Utilizar la variable del botón aquí
+                            alignment=ft.MainAxisAlignment.END,
+                            spacing=10,
+
+                        ),
+                    ],
                     expand=True,
-                    spacing=10,
-                    padding=20,
-                    auto_scroll=True
+                    spacing=10
                 ),
-                expand=True
+                expand=True,
+                bgcolor="#333333",
+                border_radius=20,
+
             ),
-            ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
         ]
 
         self.bottom_sheet = ft.BottomSheet(
@@ -130,6 +166,7 @@ class SociosPage(ft.View):
     def mostrar_snackbar(self, mensaje):
         self.page.snack_bar = ft.SnackBar(ft.Text(mensaje))
         self.page.snack_bar.open = True
+        
         self.page.update()
 
     def mostrar_banner(self, mensaje):
@@ -180,6 +217,27 @@ class SociosPage(ft.View):
         pdf.output("reporte_socios.pdf")
         self.mostrar_snackbar("PDF generado correctamente")
 
+    def show_logout_popup(self, e):
+        self.page.dialog = ft.AlertDialog(
+            title=ft.Text("Confirmar Cierre de Sesión"),
+            content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="red")),
+                ft.TextButton("Cerrar Sesión", on_click=self.logout),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.page.dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+
+    def logout(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+        self.page.go("/login")
 
 class SociosTable:
     def __init__(self, socios_page, socios_data):
@@ -203,6 +261,16 @@ class SociosTable:
         )
 
     def crear_filas(self, socios):
+        rol = AuthControlador.obtener_rol()  # Obtener el rol del usuario autenticado
+
+        def obtener_acciones(socio):
+            acciones = []
+            if rol in ["Admin", "Editor"]:
+                acciones.append(ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.socios_page.mostrar_bottomsheet_editar(s)))
+            if rol == "Admin":
+                acciones.append(ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.socios_page.confirmar_eliminar_socio(s)))
+            return acciones
+
         return [
             ft.DataRow(
                 cells=[
@@ -216,10 +284,7 @@ class SociosTable:
                     ft.DataCell(ft.Text(socio['fecha_nacimiento'])),
                     ft.DataCell(
                         ft.Row(
-                            [
-                                ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.socios_page.mostrar_bottomsheet_editar(s)),
-                                ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.socios_page.confirmar_eliminar_socio(s))
-                            ]
+                            obtener_acciones(socio)
                         )
                     )
                 ],
@@ -229,7 +294,6 @@ class SociosTable:
     def actualizar_filas(self, socios):
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
-
 
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
@@ -267,3 +331,18 @@ class SociosForm:
         )
 
         return formulario
+
+class Botones_nav:
+    def crear_botones_navegacion(page):
+        return ft.Row(
+            [
+                ft.TextButton("INICIO", icon=ft.icons.HOME_OUTLINED, on_click=lambda _: page.go("/menu")),
+                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE, on_click=lambda _: page.go("/socios")),
+                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.TextButton("AVANCES", icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=100),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )

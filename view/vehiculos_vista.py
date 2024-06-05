@@ -1,8 +1,8 @@
 import flet as ft
 from controller.vehiculo_controlador import VehiculoControlador
-from view.common.common import Common
 import mysql.connector.errors
 from fpdf import FPDF
+from controller.auth_controlador import AuthControlador
 
 class PDF(FPDF):
     def header(self):
@@ -22,7 +22,6 @@ class PDF(FPDF):
         if ln > 0:
             self.ln(h)
 
-
 class VehiculosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/vehiculos")
@@ -31,27 +30,62 @@ class VehiculosPage(ft.View):
         self.vehiculos_data = self.obtener_datos_vehiculos()
         self.tabla_vehiculos = VehiculosTable(self, self.vehiculos_data)
         
+        # Obtener el rol del usuario autenticado
+        self.rol = AuthControlador.obtener_rol()
+
+        # Definir el botón de agregar en una variable dependiendo del rol
+        btn_agregar = None
+        if self.rol in ["Admin", "Editor"]:  # Asumiendo roles en mayúsculas como en la base de datos
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+        elif self.rol == "Viewer":
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
+
+        # Añadir controles
         self.controls = [
             ft.AppBar(
                 title=ft.Text("Vehículos"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
-                leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
                 actions=[
-                    Common.crear_botones_navegacion(self.page),
-                    ft.IconButton(icon=ft.icons.PICTURE_AS_PDF, on_click=self.exportar_pdf)
+                    Botones_nav.crear_botones_navegacion(self.page),
+                    ft.PopupMenuButton(
+                        items=[
+                            ft.PopupMenuItem(
+                                text="Exportar PDF",
+                                icon=ft.icons.PICTURE_AS_PDF,
+                                on_click=self.exportar_pdf,
+                            ),
+                            ft.PopupMenuItem(
+                                text="Cerrar Sesión",
+                                icon=ft.icons.LOGOUT,
+                                on_click=self.show_logout_popup,
+                            )
+                        ]
+                    )
                 ]
             ),
             ft.Container(
-                content=ft.ListView(
-                    controls=[self.tabla_vehiculos.data_table],
+                content=ft.Column(
+                    [
+                        ft.ListView(
+                            controls=[self.tabla_vehiculos.data_table],
+                            expand=True,
+                            spacing=10,
+                            padding=20,
+                            auto_scroll=True
+                        ),
+                        ft.Row(
+                            [btn_agregar] if btn_agregar else [],  # Utilizar la variable del botón aquí
+                            alignment=ft.MainAxisAlignment.END,
+                            spacing=10,
+                        ),
+                    ],
                     expand=True,
-                    spacing=10,
-                    padding=20,
-                    auto_scroll=True
+                    spacing=10
                 ),
-                expand=True
+                expand=True,
+                bgcolor="#333333",
+                border_radius=20,
             ),
-            ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
         ]
 
         self.bottom_sheet = ft.BottomSheet(
@@ -102,9 +136,9 @@ class VehiculosPage(ft.View):
             self.mostrar_snackbar("Vehículo agregado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def actualizar_vehiculo(self, id_vehiculo, cedula, numero_control, marca, modelo, ano, placa):
         try:
@@ -114,21 +148,36 @@ class VehiculosPage(ft.View):
             self.mostrar_snackbar("Vehículo actualizado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def eliminar_vehiculo(self, id_vehiculo):
         try:
             self.vehiculo_controlador.eliminar_vehiculo(id_vehiculo)
             self.mostrar_snackbar("Vehículo eliminado correctamente")
         except mysql.connector.errors.IntegrityError:
-            self.mostrar_snackbar("No puedes eliminar este vehículo sin primero eliminar los datos asociados.")
+            self.mostrar_banner("No puedes eliminar este vehículo sin primero eliminar los datos asociados.")
         self.refrescar_datos()
 
     def mostrar_snackbar(self, mensaje):
         self.page.snack_bar = ft.SnackBar(ft.Text(mensaje))
         self.page.snack_bar.open = True
+        self.page.update()
+
+    def mostrar_banner(self, mensaje):
+        self.page.banner = ft.Banner(
+            content=ft.Text(mensaje, color=ft.colors.WHITE),
+            bgcolor="#eb3936",  # Color rojo pastel
+            actions=[
+                ft.TextButton("CERRAR", on_click=lambda _: self.cerrar_banner(), style=ft.ButtonStyle(color=ft.colors.WHITE))
+            ]
+        )
+        self.page.banner.open = True
+        self.page.update()
+
+    def cerrar_banner(self):
+        self.page.banner.open = False
         self.page.update()
 
     def refrescar_datos(self):
@@ -162,6 +211,28 @@ class VehiculosPage(ft.View):
         pdf.output("reporte_vehiculos.pdf")
         self.mostrar_snackbar("PDF generado correctamente")
 
+    def show_logout_popup(self, e):
+        self.page.dialog = ft.AlertDialog(
+            title=ft.Text("Confirmar Cierre de Sesión"),
+            content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="red")),
+                ft.TextButton("Cerrar Sesión", on_click=self.logout),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.page.dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+
+    def logout(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+        self.page.go("/login")
+
 class VehiculosTable:
     def __init__(self, vehiculos_page, vehiculos_data):
         self.vehiculos_page = vehiculos_page
@@ -182,6 +253,16 @@ class VehiculosTable:
         )
 
     def crear_filas(self, vehiculos):
+        rol = AuthControlador.obtener_rol()  # Obtener el rol del usuario autenticado
+
+        def obtener_acciones(vehiculo):
+            acciones = []
+            if rol in ["Admin", "Editor"]:
+                acciones.append(ft.IconButton(ft.icons.EDIT, on_click=lambda _, v=vehiculo: self.vehiculos_page.mostrar_bottomsheet_editar(v)))
+            if rol == "Admin":
+                acciones.append(ft.IconButton(ft.icons.DELETE, on_click=lambda _, v=vehiculo: self.vehiculos_page.confirmar_eliminar_vehiculo(v)))
+            return acciones
+
         return [
             ft.DataRow(
                 cells=[
@@ -193,10 +274,7 @@ class VehiculosTable:
                     ft.DataCell(ft.Text(vehiculo['Placa'])),
                     ft.DataCell(
                         ft.Row(
-                            [
-                                ft.IconButton(ft.icons.EDIT, on_click=lambda _, v=vehiculo: self.vehiculos_page.mostrar_bottomsheet_editar(v)),
-                                ft.IconButton(ft.icons.DELETE, on_click=lambda _, v=vehiculo: self.vehiculos_page.confirmar_eliminar_vehiculo(v))
-                            ]
+                            obtener_acciones(vehiculo)
                         )
                     )
                 ],
@@ -206,7 +284,6 @@ class VehiculosTable:
     def actualizar_filas(self, vehiculos):
         self.data_table.rows = self.crear_filas(vehiculos)
         self.data_table.update()
-
 
 class VehiculosForm:
     def __init__(self, vehiculos_page, titulo, accion, vehiculo=None):
@@ -244,3 +321,18 @@ class VehiculosForm:
         )
 
         return formulario
+
+class Botones_nav:
+    def crear_botones_navegacion(page):
+        return ft.Row(
+            [
+                ft.TextButton("INICIO", icon=ft.icons.HOME_OUTLINED, on_click=lambda _: page.go("/menu")),
+                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
+                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI, on_click=lambda _: page.go("/vehiculos")),
+                ft.TextButton("AVANCES", icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=100),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )

@@ -1,7 +1,8 @@
 import flet as ft
 from controller.avances_controlador import AvancesControlador
-from view.common.common import Common
 import mysql.connector.errors
+from fpdf import FPDF
+from controller.auth_controlador import AuthControlador
 
 class AvancesPage(ft.View):
     def __init__(self, page):
@@ -11,24 +12,62 @@ class AvancesPage(ft.View):
         self.avances_data = self.obtener_datos_avances()
         self.tabla_avances = AvancesTable(self, self.avances_data)
         
+        # Obtener el rol del usuario autenticado
+        self.rol = AuthControlador.obtener_rol()
+
+        # Definir el botón de agregar en una variable dependiendo del rol
+        btn_agregar = None
+        if self.rol in ["Admin", "Editor"]:  # Asumiendo roles en mayúsculas como en la base de datos
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+        elif self.rol == "Viewer":
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
+
+        # Añadir controles
         self.controls = [
             ft.AppBar(
                 title=ft.Text("Avances"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
-                leading=ft.IconButton(ft.icons.ARROW_BACK, on_click=lambda _: self.page.go("/menu")),
-                actions=[Common.crear_botones_navegacion(self.page)]
+                actions=[
+                    Botones_nav.crear_botones_navegacion(self.page),
+                    ft.PopupMenuButton(
+                        items=[
+                            ft.PopupMenuItem(
+                                text="Exportar PDF",
+                                icon=ft.icons.PICTURE_AS_PDF,
+                                on_click=self.exportar_pdf,
+                            ),
+                            ft.PopupMenuItem(
+                                text="Cerrar Sesión",
+                                icon=ft.icons.LOGOUT,
+                                on_click=self.show_logout_popup,
+                            )
+                        ]
+                    )
+                ]
             ),
             ft.Container(
-                content=ft.ListView(
-                    controls=[self.tabla_avances.data_table],
+                content=ft.Column(
+                    [
+                        ft.ListView(
+                            controls=[self.tabla_avances.data_table],
+                            expand=True,
+                            spacing=10,
+                            padding=20,
+                            auto_scroll=True
+                        ),
+                        ft.Row(
+                            [btn_agregar] if btn_agregar else [],  # Utilizar la variable del botón aquí
+                            alignment=ft.MainAxisAlignment.END,
+                            spacing=10,
+                        ),
+                    ],
                     expand=True,
-                    spacing=10,
-                    padding=20,
-                    auto_scroll=True
+                    spacing=10
                 ),
-                expand=True
+                expand=True,
+                bgcolor="#333333",
+                border_radius=20,
             ),
-            ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
         ]
 
         self.bottom_sheet = ft.BottomSheet(
@@ -79,9 +118,9 @@ class AvancesPage(ft.View):
             self.mostrar_snackbar("Avance agregado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def actualizar_avance(self, ID_avance, numero_control, nombre, apellido, cedula_avance, fecha_nacimiento, rif):
         try:
@@ -91,16 +130,16 @@ class AvancesPage(ft.View):
             self.mostrar_snackbar("Avance actualizado correctamente")
             self.refrescar_datos()
         except ValueError as ve:
-            self.mostrar_snackbar(f"Error de validación: {ve}")
+            self.mostrar_banner(f"Error de validación: {ve}")
         except mysql.connector.Error as err:
-            self.mostrar_snackbar(f"Error de base de datos: {err}")
+            self.mostrar_banner(f"Error de base de datos: {err}")
 
     def eliminar_avance(self, ID_avance):
         try:
             self.avances_controlador.eliminar_avance(ID_avance)
             self.mostrar_snackbar("Avance eliminado correctamente")
         except mysql.connector.errors.IntegrityError:
-            self.mostrar_snackbar("No puedes eliminar este avance.")
+            self.mostrar_banner("No puedes eliminar este avance.")
         self.refrescar_datos()
 
     def mostrar_snackbar(self, mensaje):
@@ -108,11 +147,72 @@ class AvancesPage(ft.View):
         self.page.snack_bar.open = True
         self.page.update()
 
+    def mostrar_banner(self, mensaje):
+        self.page.banner = ft.Banner(
+            content=ft.Text(mensaje, color=ft.colors.WHITE),
+            bgcolor="#eb3936",  # Color rojo pastel
+            actions=[
+                ft.TextButton("CERRAR", on_click=lambda _: self.cerrar_banner(), style=ft.ButtonStyle(color=ft.colors.WHITE))
+            ]
+        )
+        self.page.banner.open = True
+        self.page.update()
+
+    def cerrar_banner(self):
+        self.page.banner.open = False
+        self.page.update()
+
     def refrescar_datos(self):
         self.avances_data = self.obtener_datos_avances()
         self.tabla_avances.actualizar_filas(self.avances_data)
         self.cerrar_bottomsheet()
         self.page.update()
+
+    def exportar_pdf(self, e):
+        pdf = FPDF(orientation='L', unit='mm', format='A4')
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.cell(0, 10, txt="Reporte de Avances", ln=True, align='C')
+        
+        pdf.ln(10)  # Espacio debajo del título
+        
+        # Data rows
+        for avance in self.avances_data:
+            pdf.set_font("Arial", size=14)
+            pdf.cell(0, 10, txt=f"ID Avance: {avance['ID_avance']}", ln=True)
+            pdf.set_font("Arial", 'B', size=10)
+            pdf.cell(0, 10, txt=f"Nombre: {avance['nombre']}", ln=True)
+            pdf.cell(0, 10, txt=f"Apellido: {avance['apellido']}", ln=True)
+            pdf.cell(0, 10, txt=f"Cédula: {avance['cedula_avance']}", ln=True)
+            pdf.cell(0, 10, txt=f"Fecha de Nacimiento: {avance['fecha_nacimiento']}", ln=True)
+            pdf.cell(0, 10, txt=f"RIF: {avance['rif']}", ln=True)
+            
+            pdf.ln(5)  # Espacio entre registros de avances
+        
+        pdf.output("reporte_avances.pdf")
+        self.mostrar_snackbar("PDF generado correctamente")
+
+    def show_logout_popup(self, e):
+        self.page.dialog = ft.AlertDialog(
+            title=ft.Text("Confirmar Cierre de Sesión"),
+            content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
+            actions=[
+                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="red")),
+                ft.TextButton("Cerrar Sesión", on_click=self.logout),
+            ],
+            actions_alignment=ft.MainAxisAlignment.END,
+        )
+        self.page.dialog.open = True
+        self.page.update()
+
+    def close_dialog(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+
+    def logout(self, e):
+        self.page.dialog.open = False
+        self.page.update()
+        self.page.go("/login")
 
 class AvancesTable:
     def __init__(self, avances_page, avances_data):
@@ -135,6 +235,16 @@ class AvancesTable:
         )
 
     def crear_filas(self, avances):
+        rol = AuthControlador.obtener_rol()  # Obtener el rol del usuario autenticado
+
+        def obtener_acciones(avance):
+            acciones = []
+            if rol in ["Admin", "Editor"]:
+                acciones.append(ft.IconButton(ft.icons.EDIT, on_click=lambda _, a=avance: self.avances_page.mostrar_bottomsheet_editar(a)))
+            if rol == "Admin":
+                acciones.append(ft.IconButton(ft.icons.DELETE, on_click=lambda _, a=avance: self.avances_page.confirmar_eliminar_avance(a)))
+            return acciones
+
         return [
             ft.DataRow(
                 cells=[
@@ -147,10 +257,7 @@ class AvancesTable:
                     ft.DataCell(ft.Text(avance['rif'])),
                     ft.DataCell(
                         ft.Row(
-                            [
-                                ft.IconButton(ft.icons.EDIT, on_click=lambda _, a=avance: self.avances_page.mostrar_bottomsheet_editar(a)),
-                                ft.IconButton(ft.icons.DELETE, on_click=lambda _, a=avance: self.avances_page.confirmar_eliminar_avance(a))
-                            ]
+                            obtener_acciones(avance)
                         )
                     )
                 ],
@@ -194,3 +301,18 @@ class AvancesForm:
         )
 
         return formulario
+
+class Botones_nav:
+    def crear_botones_navegacion(page):
+        return ft.Row(
+            [
+                ft.TextButton("INICIO", icon=ft.icons.HOME_OUTLINED, on_click=lambda _: page.go("/menu")),
+                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
+                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.TextButton("AVANCES", icon=ft.icons.WORK, on_click=lambda _: page.go("/avances")),
+                ft.TextButton("SANCIONES", icon=ft.icons.BLOCK_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=100),
+            ],
+            alignment=ft.MainAxisAlignment.CENTER
+        )
