@@ -9,6 +9,7 @@ class MenuPage(ft.View):
             ft.AppBar(
                 title=ft.Text("Inicio"),
                 bgcolor=ft.colors.SURFACE_VARIANT,
+
                 actions=[
                     Botones_nav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
@@ -29,105 +30,79 @@ class MenuPage(ft.View):
                             [
                                 ft.Text("LINEA SAN AGATON", size=40, weight=ft.FontWeight.W_900),
                             ],
-                            alignment=ft.MainAxisAlignment.CENTER,
-                            spacing=650
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            spacing=650,
+                            vertical_alignment= ft.MainAxisAlignment.SPACE_BETWEEN
                         ),
-                        ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Icon(ft.icons.PEOPLE, size=50, color="white"),
-                                    ft.Text("SOCIOS", size=20, weight=ft.FontWeight.W_900, color="white"),
-                                ],
-                                alignment=ft.MainAxisAlignment.START,
-                            ),
-                            alignment=ft.alignment.center,
-                            width=350,
-                            height=80,
-                            border_radius=10,
-                            ink=True,
-                            on_click=lambda e: self.page.go("/socios"),
-                            bgcolor="blue",
-                            margin=ft.margin.all(10)
-                        ),
-                        ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Icon(ft.icons.LOCAL_TAXI, size=50, color="white"),
-                                    ft.Text("VEHICULOS", size=20, weight=ft.FontWeight.W_900, color="white"),
-                                ],
-                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                            ),
-                            alignment=ft.alignment.center,
-                            width=350,
-                            height=80,
-                            border_radius=10,
-                            ink=True,
-                            on_click=lambda e: self.page.go("/vehiculos"),
-                            bgcolor="blue",
-                            margin=ft.margin.all(10)
-                        ),
-                        ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Icon(ft.icons.WORK, size=50, color="white"),
-                                    ft.Text("AVANCES", size=20, weight=ft.FontWeight.W_900, color="white"),
-                                ],
-                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                            ),
-                            alignment=ft.alignment.center,
-                            width=350,
-                            height=80,
-                            border_radius=10,
-                            ink=True,
-                            on_click=lambda e: self.page.go("/avances"),
-                            bgcolor="blue",
-                            margin=ft.margin.all(10)
-                        ),
-                        ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Icon(ft.icons.BLOCK, size=50, color="white"),
-                                    ft.Text("SANCIONES", size=20, weight=ft.FontWeight.W_900, color="white"),
-                                ],
-                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                            ),
-                            alignment=ft.alignment.center,
-                            width=350,
-                            height=80,
-                            border_radius=10,
-                            ink=True,
-                            on_click=lambda e: self.page.go("/sanciones"),
-                            bgcolor="blue",
-                            margin=ft.margin.all(10)
-                        ),
-                        ft.Container(
-                            content=ft.Row(
-                                [
-                                    ft.Icon(ft.icons.ATTACH_MONEY, size=50, color="white"),
-                                    ft.Text("FINANZAS", size=20, weight=ft.FontWeight.W_900, color="white"),
-                                ],
-                                alignment=ft.MainAxisAlignment.SPACE_AROUND,
-                            ),
-                            alignment=ft.alignment.center,
-                            width=350,
-                            height=80,
-                            border_radius=10,
-                            ink=True,
-                            on_click=lambda e: self.page.go("/finanzas"),
-                            bgcolor="blue",
-                            margin=ft.margin.all(10)
+                        ft.Row(
+                            [
+                                self.containers_datos(
+                                    icon=ft.icons.PEOPLE,
+                                    title="SOCIOS",
+                                    bgcolor="#44a08d88"
+                                ),
+                                self.containers_datos(
+                                    icon=ft.icons.LOCAL_TAXI,
+                                    title="VEHICULOS",
+                                    bgcolor="#13547a88"
+                                ),
+                                self.containers_datos(
+                                    icon=ft.icons.WORK,
+                                    title="AVANCES",
+                                    bgcolor = "#92222222"
+                                ),
+                                self.containers_datos(
+                                    icon=ft.icons.BLOCK,
+                                    title="SANCIONES",
+                                    bgcolor="#0a3d6288"
+                                ),
+                                self.containers_datos(
+                                    icon=ft.icons.ATTACH_MONEY,
+                                    title="FINANZAS",
+                                    bgcolor="#0a3d6288"
+                                ),
+                            ],
+                            alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                            spacing=10
                         ),
                     ],
                     alignment=ft.MainAxisAlignment.CENTER,
-                    
+                    spacing=20
                 ),
                 expand=True,
                 alignment=ft.alignment.center,
-                bgcolor="#333333",
-                margin=5,
-                border_radius=20
+                image_src="image\LOGO_SAN_AGATON_REMASTER.png",  # Ruta de la imagen de fondo
+                bgcolor="#111111"
             )
         ]
+
+    def containers_datos(self, icon, title, bgcolor):
+        return ft.Container(
+            content=ft.Column(
+                [
+                    ft.Row(
+                        [
+                            ft.Icon(icon, size=70, color="white"),
+                            ft.Text(title, size=20, weight=ft.FontWeight.W_900, color="white"),
+                        ],
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                    ),
+                ],
+                alignment=ft.MainAxisAlignment.START,
+                spacing=10
+            ),
+            alignment=ft.alignment.center,
+            
+            width=230,
+            height=120,
+            border_radius=5,
+            ink=True,
+            bgcolor=bgcolor,
+            padding=ft.padding.all(3),
+            margin=ft.margin.all(3),
+            
+            
+        )
 
     def show_logout_popup(self, e):
         self.page.dialog = ft.AlertDialog(
@@ -165,3 +140,5 @@ class Botones_nav:
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
+
+

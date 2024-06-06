@@ -310,7 +310,7 @@ class Botones_nav:
                 ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
                 ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
                 ft.TextButton("AVANCES", icon=ft.icons.WORK, on_click=lambda _: page.go("/avances")),
-                ft.TextButton("SANCIONES", icon=ft.icons.BLOCK_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
                 ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
                 ft.VerticalDivider(width=100),
             ],
