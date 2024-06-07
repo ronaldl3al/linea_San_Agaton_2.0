@@ -83,8 +83,9 @@ class VehiculosPage(ft.View):
                     spacing=10
                 ),
                 expand=True,
-                bgcolor="#333333",
+                bgcolor="#111111",
                 border_radius=20,
+                image_src="image\LOGO_SAN_AGATON_REMASTER1.png",
             ),
         ]
 

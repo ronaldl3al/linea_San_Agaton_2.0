@@ -7,7 +7,7 @@ class LoginPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/login")
         self.page = page
-        self.username_field = ft.TextField(label="Username", password=True, width=300)
+        self.username_field = ft.TextField(label="Username", width=300)
         self.password_field = ft.TextField(label="Password", password=True, width=300)
         self.login_button = ft.ElevatedButton("Login", on_click=self.login)
         self.auth_controlador = AuthControlador()
@@ -27,6 +27,6 @@ class LoginPage(ft.View):
         if rol:
             self.page.go("/menu")
         else:
-            self.page.snack_bar = ft.SnackBar(ft.Text("Invalid credentials"))
+            self.page.snack_bar = ft.SnackBar(ft.Text("Datos ingresados incorrectos"))
             self.page.snack_bar.open = True
             self.page.update()

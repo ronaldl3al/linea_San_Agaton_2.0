@@ -18,7 +18,7 @@ class AvancesPage(ft.View):
         # Definir el botón de agregar en una variable dependiendo del rol
         btn_agregar = None
         if self.rol in ["Admin", "Editor"]:  # Asumiendo roles en mayúsculas como en la base de datos
-            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+            btn_agregar = ft.FloatingActionButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar)
         elif self.rol == "Viewer":
             btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
 
@@ -56,17 +56,18 @@ class AvancesPage(ft.View):
                             auto_scroll=True
                         ),
                         ft.Row(
-                            [btn_agregar] if btn_agregar else [],  # Utilizar la variable del botón aquí
+                            [ft.Container(content=btn_agregar, margin=ft.margin.symmetric(vertical=5, horizontal=60))] if btn_agregar else [],  # Utilizar la variable del botón aquí
                             alignment=ft.MainAxisAlignment.END,
-                            spacing=10,
-                        ),
+                            spacing=60,
+)
                     ],
                     expand=True,
                     spacing=10
                 ),
                 expand=True,
-                bgcolor="#333333",
+                bgcolor="#111111",
                 border_radius=20,
+                image_src="image\LOGO_SAN_AGATON_REMASTER1.png",
             ),
         ]
 
@@ -221,6 +222,8 @@ class AvancesTable:
 
     def crear_tabla_avances(self, avances):
         return ft.DataTable(
+            bgcolor="#33333333",
+            border_radius= 20,
             columns=[
                 ft.DataColumn(ft.Text("ID")),
                 ft.DataColumn(ft.Text("Número de Control")),

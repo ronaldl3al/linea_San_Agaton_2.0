@@ -65,8 +65,9 @@ class SancionesPage(ft.View):
                     spacing=10
                 ),
                 expand=True,
-                bgcolor="#333333",
+                bgcolor="#111111",
                 border_radius=20,
+                image_src="image\LOGO_SAN_AGATON_REMASTER1.png",
             ),
         ]
 
@@ -110,11 +111,11 @@ class SancionesPage(ft.View):
         self.bottom_sheet.open = False
         self.page.update()
 
-    def guardar_sancion(self, cedula, motivo_sancion, dias, monto):
+    def guardar_sancion(self, cedula, motivo_sancion, inicio_sancion, final_sancion, monto):
         try:
-            if not cedula or not motivo_sancion or not dias or not monto:
+            if not cedula or not motivo_sancion or not inicio_sancion or not final_sancion or not monto:
                 raise ValueError("Todos los campos son obligatorios.")
-            self.sancion_controlador.insertar_sancion(cedula, motivo_sancion, dias, monto)
+            self.sancion_controlador.insertar_sancion(cedula, motivo_sancion, inicio_sancion, final_sancion, monto)
             self.mostrar_snackbar("Sanción agregada correctamente")
             self.refrescar_datos()
         except ValueError as ve:
@@ -122,11 +123,11 @@ class SancionesPage(ft.View):
         except mysql.connector.Error as err:
             self.mostrar_banner(f"Error de base de datos: {err}")
 
-    def actualizar_sancion(self, ID_sancion, cedula, motivo_sancion, dias, monto):
+    def actualizar_sancion(self, ID_sancion, cedula, motivo_sancion, inicio_sancion, final_sancion, monto):
         try:
-            if not ID_sancion or not cedula or not motivo_sancion or not dias or not monto:
+            if not ID_sancion or not cedula or not motivo_sancion or not inicio_sancion or not final_sancion or not monto:
                 raise ValueError("Todos los campos son obligatorios.")
-            self.sancion_controlador.actualizar_sancion(ID_sancion, cedula, motivo_sancion, dias, monto)
+            self.sancion_controlador.actualizar_sancion(ID_sancion, cedula, motivo_sancion, inicio_sancion, final_sancion, monto)
             self.mostrar_snackbar("Sanción actualizada correctamente")
             self.refrescar_datos()
         except ValueError as ve:
@@ -183,7 +184,8 @@ class SancionesPage(ft.View):
             pdf.set_font("Arial", 'B', size=10)
             pdf.cell(0, 10, txt=f"Cédula: {sancion['cedula']}", ln=True)
             pdf.cell(0, 10, txt=f"Motivo: {sancion['motivo_sancion']}", ln=True)
-            pdf.cell(0, 10, txt=f"Días: {sancion['dias']}", ln=True)
+            pdf.cell(0, 10, txt=f"Fecha de Inicio: {sancion['inicio_sancion']}", ln=True)
+            pdf.cell(0, 10, txt=f"Fecha de Final: {sancion['final_sancion']}", ln=True)
             pdf.cell(0, 10, txt=f"Monto: {sancion['monto']}", ln=True)
             
             pdf.ln(5)  # Espacio entre registros de sanciones
@@ -224,7 +226,8 @@ class SancionesTable:
                 ft.DataColumn(ft.Text("ID")),
                 ft.DataColumn(ft.Text("Cédula")),
                 ft.DataColumn(ft.Text("Motivo")),
-                ft.DataColumn(ft.Text("Días")),
+                ft.DataColumn(ft.Text("Fecha de Inicio")),
+                ft.DataColumn(ft.Text("Fecha de Final")),
                 ft.DataColumn(ft.Text("Monto")),
                 ft.DataColumn(ft.Text("Acciones"))
             ],
@@ -248,7 +251,8 @@ class SancionesTable:
                     ft.DataCell(ft.Text(str(sancion['ID_sancion']))),
                     ft.DataCell(ft.Text(sancion['cedula'])),
                     ft.DataCell(ft.Text(sancion['motivo_sancion'])),
-                    ft.DataCell(ft.Text(str(sancion['dias']))),
+                    ft.DataCell(ft.Text(str(sancion['inicio_sancion']))),
+                    ft.DataCell(ft.Text(str(sancion['final_sancion']))),
                     ft.DataCell(ft.Text(str(sancion['monto']))),
                     ft.DataCell(
                         ft.Row(
@@ -271,21 +275,22 @@ class SancionesForm:
     def crear_formulario_sancion(self, titulo, accion, sancion=None):
         cedula = ft.TextField(label="Cédula", value=sancion['cedula'] if sancion else "")
         motivo_sancion = ft.TextField(label="Motivo de Sanción", value=sancion['motivo_sancion'] if sancion else "")
-        dias = ft.TextField(label="Días", value=sancion['dias'] if sancion else "")
+        inicio_sancion = ft.TextField(label="Fecha de Inicio", value=sancion['inicio_sancion'] if sancion else "")
+        final_sancion = ft.TextField(label="Fecha de Final", value=sancion['final_sancion'] if sancion else "")
         monto = ft.TextField(label="Monto", value=sancion['monto'] if sancion else "")
 
         formulario = ft.Container(
             ft.Column([
                 ft.Row([cedula, motivo_sancion], spacing=10),
-                ft.Row([dias, monto], spacing=10),
+                ft.Row([inicio_sancion, final_sancion, monto], spacing=10),
                 ft.Row(
                     [
                         ft.TextButton("Cancelar", on_click=lambda _: self.sanciones_page.cerrar_bottomsheet()),
                         ft.TextButton("Guardar", on_click=lambda _: accion(
                             sancion['ID_sancion'] if sancion else None,
-                            cedula.value, motivo_sancion.value, dias.value, monto.value
+                            cedula.value, motivo_sancion.value, inicio_sancion.value, final_sancion.value, monto.value
                         ) if sancion else self.sanciones_page.guardar_sancion(
-                            cedula.value, motivo_sancion.value, dias.value, monto.value
+                            cedula.value, motivo_sancion.value, inicio_sancion.value, final_sancion.value, monto.value
                         ))
                     ],
                     alignment=ft.MainAxisAlignment.END
@@ -311,3 +316,4 @@ class Botones_nav:
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
+

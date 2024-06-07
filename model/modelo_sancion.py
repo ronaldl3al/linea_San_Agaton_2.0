@@ -14,26 +14,26 @@ class ModeloSancion:
         conexion.close()
         return sanciones
 
-    def insertar_sancion(self, cedula, motivo_sancion, dias, monto):
+    def insertar_sancion(self, cedula, motivo_sancion, inicio_sancion, final_sancion, monto):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor()
         query = """
-        INSERT INTO sanciones (cedula, motivo_sancion, dias, monto)
+        INSERT INTO sanciones (cedula, motivo_sancion, inicio_sancion, final_sancion, monto)
         VALUES (%s, %s, %s, %s)"""
-        cursor.execute(query, (cedula, motivo_sancion, dias, monto))
+        cursor.execute(query, (cedula, motivo_sancion, inicio_sancion, final_sancion, monto))
         conexion.commit()
         cursor.close()
         conexion.close()
 
-    def actualizar_sancion(self, ID_sancion, cedula, motivo_sancion, dias, monto):
+    def actualizar_sancion(self, ID_sancion, cedula, motivo_sancion, inicio_sancion, final_sancion, monto):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor()
         query = """
         UPDATE sanciones 
-        SET cedula = %s, motivo_sancion = %s, dias = %s, monto = %s
+        SET cedula = %s, motivo_sancion = %s, inicio_sancion, final_sancion = %s, monto = %s
         WHERE ID_sancion = %s
         """
-        cursor.execute(query, (cedula, motivo_sancion, dias, monto, ID_sancion))
+        cursor.execute(query, (cedula, motivo_sancion, inicio_sancion, final_sancion, monto, ID_sancion))
         conexion.commit()
         cursor.close()
         conexion.close()
