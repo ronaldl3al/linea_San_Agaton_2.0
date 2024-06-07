@@ -8,6 +8,7 @@ class FinanzasPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/finanzas")
         self.page = page
+        self.bgcolor = "#C5C7E8"
         self.finanza_controlador = FinanzaControlador()
         self.finanzas_data = self.obtener_datos_finanzas()
         self.tabla_finanzas = FinanzasTable(self, self.finanzas_data)
@@ -25,8 +26,13 @@ class FinanzasPage(ft.View):
         # Añadir controles
         self.controls = [
             ft.AppBar(
-                title=ft.Text("Finanzas"),
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                title=ft.Text(
+                    "FINANZAS",
+                    weight="w500",
+                    size=35,
+                    font_family="Arial Black italic",  # Especifica la familia de fuentes
+                                ),
+                bgcolor="#0D1223",
                 actions=[
                     Botones_nav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
@@ -149,7 +155,7 @@ class FinanzasPage(ft.View):
         self.page.update()
 
     def mostrar_banner(self, mensaje):
-        self.page.banner = ft.Banner(
+        self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
             bgcolor="#eb3936",  # Color rojo pastel
             actions=[
@@ -180,7 +186,6 @@ class FinanzasPage(ft.View):
         # Data rows
         for finanza in self.finanzas_data:
             pdf.set_font("Arial", size=14)
-            pdf.cell(0, 10, txt=f"ID Finanzas: {finanza['ID_finanzas']}", ln=True)
             pdf.set_font("Arial", 'B', size=10)
             pdf.cell(0, 10, txt=f"Cédula: {finanza['cedula']}", ln=True)
             pdf.cell(0, 10, txt=f"Pagos Mensuales: {finanza['pagos_mensuales']}", ln=True)
@@ -222,7 +227,6 @@ class FinanzasTable:
     def crear_tabla_finanzas(self, finanzas):
         return ft.DataTable(
             columns=[
-                ft.DataColumn(ft.Text("ID")),
                 ft.DataColumn(ft.Text("Cédula")),
                 ft.DataColumn(ft.Text("Pagos Mensuales")),
                 ft.DataColumn(ft.Text("Impuestos Anuales")),
@@ -246,7 +250,6 @@ class FinanzasTable:
         return [
             ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(str(finanza['ID_finanzas']))),
                     ft.DataCell(ft.Text(finanza['cedula'])),
                     ft.DataCell(ft.Text(str(finanza['pagos_mensuales']))),
                     ft.DataCell(ft.Text(str(finanza['impuestos_anuales']))),

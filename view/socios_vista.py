@@ -3,6 +3,7 @@ from controller.socios_controlador import SocioControlador
 import mysql.connector.errors
 from fpdf import FPDF
 from controller.auth_controlador import AuthControlador
+import re
 
 class PDF(FPDF):
     def header(self):
@@ -14,12 +15,11 @@ class PDF(FPDF):
         self.set_font('Arial', 'I', 8)
         self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
 
-    def cell_with_multiline(self, w, h, text, border=0, ln=0, align='', fill=False):
-        # Split text into lines
+    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
         lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
         for line in lines:
             self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
-            border = 0  # Only border the first line
+            border = 0 
         if ln > 0:
             self.ln(h)
 
@@ -27,6 +27,7 @@ class SociosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/socios")
         self.page = page
+        self.bgcolor = "#F4F9FA"
         self.socio_controlador = SocioControlador()
         self.socios_data = self.obtener_datos_socios()
         self.tabla_socios = SociosTable(self, self.socios_data)
@@ -44,8 +45,8 @@ class SociosPage(ft.View):
         # Añadir controles
         self.controls = [
             ft.AppBar(
-                title=ft.Text("Socios"),
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                title=ft.Text("SOCIOS",weight="w500",size=35,font_family="Arial Black italic",),
+                bgcolor="#0D1223",
                 actions=[
                     Botones_nav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
@@ -88,13 +89,21 @@ class SociosPage(ft.View):
                 bgcolor="#111111",
                 border_radius=20,
                 image_src="image\LOGO_SAN_AGATON_REMASTER1.png",
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.center_right,
+                    colors=["#0D1223", "#182241"]
+                )
 
             ),
         ]
 
         self.bottom_sheet = ft.BottomSheet(
             ft.Container(),
+            
             open=False,
+#region color furmilario
+            bgcolor="#182241",
             on_dismiss=self.cerrar_bottomsheet
         )
         self.page.overlay.append(self.bottom_sheet)
@@ -118,11 +127,16 @@ class SociosPage(ft.View):
             content=ft.Text(f"¿Estás seguro de que deseas eliminar al socio {socio['nombres']} {socio['apellidos']}?"),
             actions=[
                 ft.TextButton("Cancelar", on_click=lambda _: self.cerrar_dialogo()),
-                ft.TextButton("Eliminar", on_click=lambda _: self.eliminar_socio(socio['cedula']))
+                ft.TextButton("Eliminar", on_click=lambda _: self.eliminar_y_cerrar_dialogo(socio['cedula']))
             ]
         )
         self.page.dialog.open = True
         self.page.update()
+
+    def eliminar_y_cerrar_dialogo(self, cedula):
+        self.eliminar_socio(cedula)
+        self.cerrar_dialogo()
+
 
     def cerrar_dialogo(self):
         self.page.dialog.open = False
@@ -165,13 +179,14 @@ class SociosPage(ft.View):
         self.refrescar_datos()
 
     def mostrar_snackbar(self, mensaje):
-        self.page.snack_bar = ft.SnackBar(ft.Text(mensaje))
+        self.page.snack_bar = ft.SnackBar(ft.Text(
+        mensaje),bgcolor="#F4F9FA")
         self.page.snack_bar.open = True
         
         self.page.update()
 
     def mostrar_banner(self, mensaje):
-        self.page.banner = ft.Banner(
+        self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
             bgcolor="#eb3936",  # Color rojo pastel
             actions=[
@@ -247,16 +262,21 @@ class SociosTable:
 
     def crear_tabla_socios(self, socios):
         return ft.DataTable(
+            bgcolor="#40404040",
+            border_radius= 20,
             columns=[
-                ft.DataColumn(ft.Text("Cédula")),
-                ft.DataColumn(ft.Text("Nombres")),
-                ft.DataColumn(ft.Text("Apellidos")),
-                ft.DataColumn(ft.Text("Dirección")),
-                ft.DataColumn(ft.Text("Teléfono")),
-                ft.DataColumn(ft.Text("Control")),
-                ft.DataColumn(ft.Text("RIF")),
-                ft.DataColumn(ft.Text("Fecha Nacimiento")),
-                ft.DataColumn(ft.Text("Acciones"))
+                
+                ft.DataColumn(ft.Text("Control",weight="w700",size=16,font_family="Arial Black italic",)),
+                
+                ft.DataColumn(ft.Text("Nombres",weight="w700",size=16,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Apellidos",weight="w700",size=16,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Cédula",weight="w700",size=16,font_family="Arial Black italic")),
+                
+                ft.DataColumn(ft.Text("Teléfono",weight="w700",size=16,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Dirección",weight="w700",size=16,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("RIF",weight="w700",size=16,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Fecha Nac.",weight="w800",size=19,font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Acciones",weight="w800",size=19,font_family="Arial Black italic"))
             ],
             rows=self.crear_filas(socios),
         )
@@ -267,20 +287,22 @@ class SociosTable:
         def obtener_acciones(socio):
             acciones = []
             if rol in ["Admin", "Editor"]:
-                acciones.append(ft.IconButton(ft.icons.EDIT, on_click=lambda _, s=socio: self.socios_page.mostrar_bottomsheet_editar(s)))
+                acciones.append(ft.IconButton(ft.icons.EDIT, icon_color="#F4F9FA", on_click=lambda _, s=socio: self.socios_page.mostrar_bottomsheet_editar(s)))
             if rol == "Admin":
-                acciones.append(ft.IconButton(ft.icons.DELETE, on_click=lambda _, s=socio: self.socios_page.confirmar_eliminar_socio(s)))
+                acciones.append(ft.IconButton(ft.icons.DELETE_OUTLINE,icon_color="#eb3936", on_click=lambda _, s=socio: self.socios_page.confirmar_eliminar_socio(s)))
             return acciones
 
         return [
             ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(socio['cedula'])),
+                    ft.DataCell(ft.Text(socio['numero_control'],),),
+                    
                     ft.DataCell(ft.Text(socio['nombres'])),
                     ft.DataCell(ft.Text(socio['apellidos'])),
-                    ft.DataCell(ft.Text(socio['direccion'])),
+                    ft.DataCell(ft.Text(socio['cedula'])),
+                    
                     ft.DataCell(ft.Text(socio['numero_telefono'])),
-                    ft.DataCell(ft.Text(socio['numero_control'])),
+                    ft.DataCell(ft.Text(socio['direccion'])),
                     ft.DataCell(ft.Text(socio['rif'])),
                     ft.DataCell(ft.Text(socio['fecha_nacimiento'])),
                     ft.DataCell(
@@ -296,20 +318,45 @@ class SociosTable:
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
 
+class Validations:
+    @staticmethod
+    def validate_name(name):
+        if not name.isalpha():
+            return "El nombre solo debe contener letras."
+        return None
+
+    @staticmethod
+    def validate_last_name(last_name):
+        if not last_name.isalpha():
+            return "El apellido solo debe contener letras."
+        return None
+
+    @staticmethod
+    def validate_date_format(date_str):
+        date_pattern = re.compile(r'\d{4}-\d{2}-\d{2}')
+        if not date_pattern.match(date_str):
+            return "La fecha debe tener el formato AAAA-MM-DD."
+        return None
+
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
         self.socios_page = socios_page
         self.formulario = self.crear_formulario_socio(titulo, accion, socio)
 
+    def validate_date(self, e):
+        error_text = Validations.validate_date_format(e.control.value)
+        e.control.error_text = error_text
+        e.control.update()
+
     def crear_formulario_socio(self, titulo, accion, socio=None):
-        cedula = ft.TextField(label="Cédula", value=socio['cedula'] if socio else "")
-        nombres = ft.TextField(label="Nombres", value=socio['nombres'] if socio else "")
-        apellidos = ft.TextField(label="Apellidos", value=socio['apellidos'] if socio else "")
-        direccion = ft.TextField(label="Dirección", value=socio['direccion'] if socio else "", multiline=True)
-        telefono = ft.TextField(label="Teléfono", value=socio['numero_telefono'] if socio else "")
-        control = ft.TextField(label="Control", value=socio['numero_control'] if socio else "")
-        rif = ft.TextField(label="RIF", value=socio['rif'] if socio else "")
-        fecha_nacimiento = ft.TextField(label="Fecha Nacimiento", hint_text="aaaa/mm/dd", value=socio['fecha_nacimiento'] if socio else "")
+        cedula = ft.TextField(border_radius=13, label="Cédula", max_length=10, input_filter=ft.NumbersOnlyInputFilter(), value=socio['cedula'] if socio else "")
+        nombres = ft.TextField(border_radius=13, label="Nombres", value=socio['nombres'] if socio else "")
+        apellidos = ft.TextField(border_radius=13, label="Apellidos", value=socio['apellidos'] if socio else "")
+        direccion = ft.TextField(border_radius=13, label="Dirección", value=socio['direccion'] if socio else "", multiline=True)
+        telefono = ft.TextField(border_radius=13, label="Teléfono", value=socio['numero_telefono'] if socio else "")
+        control = ft.TextField(border_radius=13, label="Control", value=socio['numero_control'] if socio else "")
+        rif = ft.TextField(border_radius=13, label="RIF", value=socio['rif'] if socio else "")
+        fecha_nacimiento = ft.TextField(border_radius=13, label="Fecha Nacimiento", on_change=self.validate_date, hint_text="aaaa-mm-dd", value=socio['fecha_nacimiento'] if socio else "")
 
         formulario = ft.Container(
             ft.Column([

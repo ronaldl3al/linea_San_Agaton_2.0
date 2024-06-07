@@ -4,10 +4,12 @@ from controller.auth_controlador import AuthControlador
 import mysql.connector.errors
 from fpdf import FPDF
 
+
 class SancionesPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/sanciones")
         self.page = page
+        self.bgcolor = "#C5C7E8"
         self.sancion_controlador = SancionControlador()
         self.sanciones_data = self.obtener_datos_sanciones()
         self.tabla_sanciones = SancionesTable(self, self.sanciones_data)
@@ -25,8 +27,13 @@ class SancionesPage(ft.View):
         # Añadir controles
         self.controls = [
             ft.AppBar(
-                title=ft.Text("Sanciones"),
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                title=ft.Text(
+                    "SANCIONES",
+                    weight="w500",
+                    size=35,
+                    font_family="Arial Black italic",  # Especifica la familia de fuentes
+                                ),
+                bgcolor="#0D1223",
                 actions=[
                     Botones_nav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
@@ -149,7 +156,7 @@ class SancionesPage(ft.View):
         self.page.update()
 
     def mostrar_banner(self, mensaje):
-        self.page.banner = ft.Banner(
+        self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
             bgcolor="#eb3936",  # Color rojo pastel
             actions=[

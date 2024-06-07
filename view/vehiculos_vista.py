@@ -26,6 +26,7 @@ class VehiculosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/vehiculos")
         self.page = page
+        self.bgcolor = "#C5C7E8"
         self.vehiculo_controlador = VehiculoControlador()
         self.vehiculos_data = self.obtener_datos_vehiculos()
         self.tabla_vehiculos = VehiculosTable(self, self.vehiculos_data)
@@ -43,8 +44,13 @@ class VehiculosPage(ft.View):
         # Añadir controles
         self.controls = [
             ft.AppBar(
-                title=ft.Text("Vehículos"),
-                bgcolor=ft.colors.SURFACE_VARIANT,
+                title=ft.Text(
+                    "AVANCES",
+                    weight="w500",
+                    size=35,
+                    font_family="Arial Black italic",  # Especifica la familia de fuentes
+                                ),
+                bgcolor="#0D1223",
                 actions=[
                     Botones_nav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
@@ -167,7 +173,7 @@ class VehiculosPage(ft.View):
         self.page.update()
 
     def mostrar_banner(self, mensaje):
-        self.page.banner = ft.Banner(
+        self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
             bgcolor="#eb3936",  # Color rojo pastel
             actions=[

@@ -4,7 +4,7 @@ class MenuPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/menu")
         self.page = page
-        self.bgcolor = "#C5C7E8"
+        self.bgcolor = "#F4F9FA"
 
         self.controls = [
             ft.AppBar(
@@ -18,13 +18,17 @@ class MenuPage(ft.View):
                 actions=[
                     BotonesNav.crear_botones_navegacion(self.page),
                     ft.PopupMenuButton(
+                        
                         items=[
                             ft.PopupMenuItem(
+                                
                                 text="Cerrar Sesión",
                                 icon=ft.icons.LOGOUT,
                                 on_click=self.show_logout_popup,
+                                
                             )
-                        ]
+                        ],
+                        bgcolor="#22315D"
                     )
                 ],
             ),
@@ -46,27 +50,27 @@ class MenuPage(ft.View):
                                 self.containers_datos(
                                     icon=ft.icons.PEOPLE_OUTLINE,
                                     title="SOCIOS",
-                                    bgcolor="#32445C"
+                                    bgcolor="#22315D"
                                 ),
                                 self.containers_datos(
                                     icon=ft.icons.LOCAL_TAXI_OUTLINED,
                                     title="VEHICULOS",
-                                    bgcolor="#32445C"
+                                    bgcolor="#22315D"
                                 ),
                                 self.containers_datos(
                                     icon=ft.icons.WORK_OFF_OUTLINED,
                                     title="AVANCES",
-                                    bgcolor="#32445C"
+                                    bgcolor="#22315D"
                                 ),
                                 self.containers_datos(
                                     icon=ft.icons.BLOCK_OUTLINED,
                                     title="SANCIONES",
-                                    bgcolor="#32445C"
+                                    bgcolor="#22315D"
                                 ),
                                 self.containers_datos(
                                     icon=ft.icons.ATTACH_MONEY_OUTLINED,
                                     title="FINANZAS",
-                                    bgcolor="#32445C"
+                                    bgcolor="#22315D"
                                 ),
                             ],
                             alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
@@ -78,13 +82,13 @@ class MenuPage(ft.View):
                 expand=True,
                 alignment=ft.alignment.center,
                 image_src="image/LOGO_SAN_AGATON_REMASTER1.png",  # Ruta de la imagen de fondo
-                bgcolor="#1B2734",
+                bgcolor="#111111",
                 border_radius=20,
                 padding=ft.padding.all(20),
                 gradient=ft.LinearGradient(
-                    begin=ft.alignment.top_left,
-                    end=ft.alignment.bottom_right,
-                    colors=["#0D1223", "#19222E"]
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.center_right,
+                    colors=["#0D1223", "#182241"]
                 )
             )
         ]
@@ -95,14 +99,13 @@ class MenuPage(ft.View):
                 [
                     ft.Row(
                         [
-                            ft.Icon(icon, size=100, color="#C5C7E8"),
-                            ft.Text(title, size=20, weight=ft.FontWeight.W_900, color="white"),
+                            ft.Icon(icon, size=90, color="#F4F9FAaa"),
+                            ft.Text(title, size=20, weight=ft.FontWeight.W_900, color="#F4F9FAaa"),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     ),
                 ],
-                alignment=ft.MainAxisAlignment.START,
-                spacing=10
+                alignment=ft.MainAxisAlignment.CENTER,
             ),
             alignment=ft.alignment.center,
             width=230,
@@ -115,6 +118,7 @@ class MenuPage(ft.View):
 
     def show_logout_popup(self, e):
         self.page.dialog = ft.AlertDialog(
+            bgcolor= "#0C1222",
             title=ft.Text("Confirmar Cierre de Sesión"),
             content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
             actions=[
