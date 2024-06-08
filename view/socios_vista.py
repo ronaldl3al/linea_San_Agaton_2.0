@@ -4,6 +4,7 @@ import mysql.connector.errors
 from fpdf import FPDF
 from controller.auth_controlador import AuthControlador
 import re
+from datetime import datetime
 
 class PDF(FPDF):
     def header(self):
@@ -42,28 +43,59 @@ class SociosPage(ft.View):
         elif self.rol == "Viewer":
             btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
 
-        # Añadir controles
+        # 
+        
+
         self.controls = [
-            ft.AppBar(
-                title=ft.Text("SOCIOS", weight="w500", size=35, font_family="Arial Black italic"),
-                bgcolor="#0D1223",
-                actions=[
-                    Botones_nav.crear_botones_navegacion(self.page),
-                    ft.PopupMenuButton(
-                        items=[
-                            ft.PopupMenuItem(
-                                text="Exportar PDF",
-                                icon=ft.icons.PICTURE_AS_PDF,
-                                on_click=self.exportar_pdf,
-                            ),
-                            ft.PopupMenuItem(
-                                text="Cerrar Sesión",
-                                icon=ft.icons.LOGOUT,
-                                on_click=self.show_logout_popup,
-                            )
-                        ]
-                    )
-                ]
+            ft.Container(
+                bgcolor="#111111",
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.center_right,
+                    colors=["#0D1223", "#182241"]
+                ),
+                border_radius=20,
+                content = ft.Row(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    "SOCIOS",
+                                    weight="w500",
+                                    size=35,
+                                    font_family="Arial Black italic"
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
+                        ),
+                        ft.Row(
+                            [
+                                Botones_nav.crear_botones_navegacion(self.page),
+                                ft.PopupMenuButton(
+                                    bgcolor="#1E2A4A",
+                                    items=[
+                                        ft.PopupMenuItem(
+                                            text="Exportar PDF",
+                                            icon=ft.icons.PICTURE_AS_PDF,
+                                            on_click=self.exportar_pdf,
+                                        ),
+                                        ft.PopupMenuItem(
+                                            text="Cerrar Sesión",
+                                            icon=ft.icons.LOGOUT,
+                                            on_click=self.show_logout_popup,
+                                        )
+                                    ]
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.END
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+
+
+                padding=20
             ),
             ft.Container(
                 content=ft.Column(
@@ -77,8 +109,7 @@ class SociosPage(ft.View):
                         ),
                         ft.Row(
                             [btn_agregar] if btn_agregar else [],  # Utilizar la variable del botón aquí
-                            alignment=ft.MainAxisAlignment.END,
-                            spacing=10,
+                            alignment=ft.MainAxisAlignment.CENTER,
                         ),
                     ],
                     expand=True,
@@ -92,14 +123,15 @@ class SociosPage(ft.View):
                     begin=ft.alignment.top_center,
                     end=ft.alignment.center_right,
                     colors=["#0D1223", "#182241"]
-                )
+                ),
             ),
         ]
+
 
         self.bottom_sheet = ft.BottomSheet(
             ft.Container(),
             open=False,
-            bgcolor="#182241",
+            bgcolor="#0D1223",
             on_dismiss=self.cerrar_bottomsheet
         )
         self.page.overlay.append(self.bottom_sheet)
@@ -119,11 +151,12 @@ class SociosPage(ft.View):
 
     def confirmar_eliminar_socio(self, socio):
         self.page.dialog = ft.AlertDialog(
+            bgcolor="#0D1223",
             title=ft.Text("Confirmar eliminación"),
             content=ft.Text(f"¿Estás seguro de que deseas eliminar al socio {socio['nombres']} {socio['apellidos']}?"),
             actions=[
                 ft.TextButton("Cancelar", on_click=lambda _: self.cerrar_dialogo()),
-                ft.TextButton("Eliminar", on_click=lambda _: self.eliminar_y_cerrar_dialogo(socio['cedula']))
+                ft.TextButton("Eliminar", on_click=lambda _: self.eliminar_y_cerrar_dialogo(socio['cedula']), style=ft.ButtonStyle(color="red"))
             ]
         )
         self.page.dialog.open = True
@@ -231,10 +264,11 @@ class SociosPage(ft.View):
             title=ft.Text("Confirmar Cierre de Sesión"),
             content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
             actions=[
-                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="red")),
+                ft.TextButton("Cancelar", on_click=self.close_dialog, style=ft.ButtonStyle(color="#eb3936")),
                 ft.TextButton("Cerrar Sesión", on_click=self.logout),
             ],
             actions_alignment=ft.MainAxisAlignment.END,
+            bgcolor="#0D1223"
         )
         self.page.dialog.open = True
         self.page.update()
@@ -305,19 +339,24 @@ class SociosTable:
     def actualizar_filas(self, socios):
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
-
+#region botones navegacion
 class Botones_nav:
     @staticmethod
     def crear_botones_navegacion(page):
         return ft.Row(
             [
-                ft.TextButton("INICIO", icon=ft.icons.HOME_OUTLINED, on_click=lambda _: page.go("/menu")),
-                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE, on_click=lambda _: page.go("/socios")),
-                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
-                ft.TextButton("AVANCES", icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
-                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
-                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
-                ft.VerticalDivider(width=100),
+                ft.TextButton("INICIO", scale=1.2,icon=ft.icons.HOME_OUTLINED,   on_click=lambda _: page.go("/menu"), ),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("SOCIOS", scale=1.2,icon=ft.icons.PEOPLE,style=ft.ButtonStyle(color="#F4F9FA"),  on_click=lambda _: page.go("/socios")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("VEHICULOS", scale=1.2,icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("AVANCES", scale=1.2,icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("SANCIONES", scale=1.2,icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("FINANZAS", scale=1.2,icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=40,),
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
@@ -325,8 +364,6 @@ class Botones_nav:
 
 #region validacion
 
-from datetime import datetime
-import re
 
 class Validacion:
     @staticmethod
@@ -341,6 +378,16 @@ class Validacion:
         patron = r'^[VE]-\d{7,9}$'
         return re.match(patron, cedula) is not None
 
+    @staticmethod
+    def validar_texto(texto):
+        patron = r'^[a-zA-Z\s]+$'
+        return re.match(patron, texto) is not None
+
+    @staticmethod
+    def validar_rif(rif):
+        patron = r'^[VEJPG]\d{7,10}$'
+        return re.match(patron, rif) is not None
+
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
         self.socios_page = socios_page
@@ -349,8 +396,24 @@ class SociosForm:
 
     def crear_formulario_socio(self, titulo, accion, socio=None):
         control = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="Control", max_length=2, width=85, input_filter=ft.NumbersOnlyInputFilter(), value=socio['numero_control'] if socio else "")
-        nombres = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="Nombres", max_length=30, input_filter=ft.TextOnlyInputFilter(), value=socio['nombres'] if socio else "")
-        apellidos = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="Apellidos", max_length=30, input_filter=ft.TextOnlyInputFilter(), value=socio['apellidos'] if socio else "")
+        nombres = ft.TextField(
+            border_radius=13, 
+            border_color="#F4F9FA", 
+            focused_border_color="#06F58E", 
+            label="Nombres", 
+            max_length=30, 
+            value=socio['nombres'] if socio else "",
+            on_change=self.validar_texto
+        )
+        apellidos = ft.TextField(
+            border_radius=13, 
+            border_color="#F4F9FA", 
+            focused_border_color="#06F58E", 
+            label="Apellidos", 
+            max_length=30, 
+            value=socio['apellidos'] if socio else "",
+            on_change=self.validar_texto
+        )
         cedula = ft.TextField(
             border_radius=13, 
             border_color="#F4F9FA", 
@@ -360,11 +423,20 @@ class SociosForm:
             width=180, 
             hint_text="V-/E-", 
             value=socio['cedula'] if socio else "",
-            on_change=self.validar_cedula  # Añadir la validación en el cambio de texto
+            on_change=self.validar_cedula
         )
         telefono = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="Teléfono", max_length=15, width=175, prefix_text="+58 ", input_filter=ft.NumbersOnlyInputFilter(), hint_text="414 1234567", value=socio['numero_telefono'] if socio else "")
         direccion = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="Dirección", width=420, value=socio['direccion'] if socio else "", max_length=255, hint_text="municipio/urb/sector/calle/casa", multiline=True)
-        rif = ft.TextField(border_radius=13, border_color="#F4F9FA", focused_border_color="#06F58E", label="RIF", width=180, max_length=15, value=socio['rif'] if socio else "")
+        rif = ft.TextField(
+            border_radius=13, 
+            border_color="#F4F9FA", 
+            focused_border_color="#06F58E", 
+            label="RIF", 
+            width=180, 
+            max_length=15, 
+            value=socio['rif'] if socio else "",
+            on_change=self.validar_rif
+        )
         fecha_nacimiento = ft.TextField(
             border_radius=13, 
             border_color="#F4F9FA", 
@@ -372,9 +444,9 @@ class SociosForm:
             label="Fecha Nacimiento", 
             max_length=10, 
             width=140, 
-            hint_text="AAAA-MM-DD", 
+            hint_text="AA/MM/DD", 
             value=socio['fecha_nacimiento'] if socio else "",
-            on_change=self.validar_fecha_nacimiento  # Añadir la validación en el cambio de texto
+            on_change=self.validar_fecha_nacimiento
         )
 
         formulario = ft.Container(
@@ -403,7 +475,7 @@ class SociosForm:
             e.control.error_text = None
             e.control.update()
         else:
-            e.control.error_text = "Formato AAAA/MM/DD"
+            e.control.error_text = "AA/MM/DD"
             e.control.update()
 
     def validar_cedula(self, e):
@@ -414,9 +486,29 @@ class SociosForm:
             e.control.error_text = "'V-' o 'E-'"
             e.control.update()
 
+    def validar_texto(self, e):
+        if Validacion.validar_texto(e.control.value):
+            e.control.error_text = None
+            e.control.update()
+        else:
+            e.control.error_text = "Solo se permiten letras"
+            e.control.update()
+
+    def validar_rif(self, e):
+        if Validacion.validar_rif(e.control.value):
+            e.control.error_text = None
+            e.control.update()
+        else:
+            e.control.error_text = "Formato RIF inválido"
+            e.control.update()
+
     def guardar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         fecha_str = fecha_nacimiento.value if isinstance(fecha_nacimiento.value, str) else fecha_nacimiento.value.strftime('%Y-%m-%d')
-        if Validacion.validar_fecha(fecha_str) and Validacion.validar_cedula(cedula.value):
+        if (Validacion.validar_fecha(fecha_str) and
+            Validacion.validar_cedula(cedula.value) and
+            Validacion.validar_texto(nombres.value) and
+            Validacion.validar_texto(apellidos.value) and
+            Validacion.validar_rif(rif.value)):
             # Si la fecha y la cédula son válidas, proceder con la acción
             self.accion(cedula.value, nombres.value, apellidos.value, direccion.value, telefono.value, control.value, rif.value, fecha_str)
         else:
@@ -425,3 +517,9 @@ class SociosForm:
                 self.socios_page.mostrar_banner("La fecha de nacimiento no es válida. Debe estar en el formato 'aaaa-mm-dd'.")
             if not Validacion.validar_cedula(cedula.value):
                 self.socios_page.mostrar_banner("La cédula no es válida. Debe ser 'V-' o 'E-' seguido de 7 a 9 dígitos.")
+            if not Validacion.validar_texto(nombres.value):
+                self.socios_page.mostrar_banner("El nombre no es válido. Solo se permiten letras y espacios.")
+            if not Validacion.validar_texto(apellidos.value):
+                self.socios_page.mostrar_banner("El apellido no es válido. Solo se permiten letras y espacios.")
+            if not Validacion.validar_rif(rif.value):
+                self.socios_page.mostrar_banner("El RIF no es válido. Debe empezar por 'V', 'E', 'J', 'P', 'G' seguido de 7 a 10 dígitos.")

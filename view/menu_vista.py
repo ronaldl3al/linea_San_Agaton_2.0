@@ -7,30 +7,50 @@ class MenuPage(ft.View):
         self.bgcolor = "#F4F9FA"
 
         self.controls = [
-            ft.AppBar(
-                title=ft.Text(
-                    "INICIO",
-                    weight="w500",
-                    size=35,
-                    font_family="Arial Black italic",  # Especifica la familia de fuentes
+            ft.Container(
+                bgcolor="#111111",
+                gradient=ft.LinearGradient(
+                    begin=ft.alignment.top_center,
+                    end=ft.alignment.center_right,
+                    colors=["#0D1223", "#182241"]
                 ),
-                bgcolor="#0D1223",
-                actions=[
-                    BotonesNav.crear_botones_navegacion(self.page),
-                    ft.PopupMenuButton(
-                        
-                        items=[
-                            ft.PopupMenuItem(
-                                
-                                text="Cerrar Sesión",
-                                icon=ft.icons.LOGOUT,
-                                on_click=self.show_logout_popup,
-                                
-                            )
-                        ],
-                        bgcolor="#22315D"
-                    )
-                ],
+                border_radius=20,
+                content = ft.Row(
+                    [
+                        ft.Row(
+                            [
+                                ft.Text(
+                                    "INICIO",
+                                    weight="w500",
+                                    size=35,
+                                    font_family="Arial Black italic"
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.START,
+                            expand=True
+                        ),
+                        ft.Row(
+                            [
+                                BotonesNav.crear_botones_navegacion(self.page),
+                                ft.PopupMenuButton(
+                                    bgcolor="#1E2A4A",
+                                    items=[
+                                        ft.PopupMenuItem(
+                                            text="Cerrar Sesión",
+                                            icon=ft.icons.LOGOUT,
+                                            on_click=self.show_logout_popup,
+                                        )
+                                    ]
+                                )
+                            ],
+                            alignment=ft.MainAxisAlignment.END
+                        )
+                    ],
+                    alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                ),
+
+
+                padding=20
             ),
             ft.Container(
                 content=ft.Column(
@@ -144,13 +164,18 @@ class BotonesNav:
     def crear_botones_navegacion(page):
         return ft.Row(
             [
-                ft.TextButton("INICIO", icon=ft.icons.HOME, on_click=lambda _: page.go("/menu")),
-                ft.TextButton("SOCIOS", icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
-                ft.TextButton("VEHICULOS", icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
-                ft.TextButton("AVANCES", icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
-                ft.TextButton("SANCIONES", icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
-                ft.TextButton("FINANZAS", icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
-                ft.VerticalDivider(width=100, color="#0D1223")
+                ft.TextButton("INICIO", scale=1.2,icon=ft.icons.HOME,style=ft.ButtonStyle(color="#F4F9FA"),   on_click=lambda _: page.go("/menu"), ),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("SOCIOS", scale=1.2,icon=ft.icons.PEOPLE_OUTLINE,  on_click=lambda _: page.go("/socios")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("VEHICULOS", scale=1.2,icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("AVANCES", scale=1.2,icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("SANCIONES", scale=1.2,icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.VerticalDivider(width=2.5,),
+                ft.TextButton("FINANZAS", scale=1.2,icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=40,),
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
