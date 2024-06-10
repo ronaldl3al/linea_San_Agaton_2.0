@@ -289,7 +289,7 @@ class SociosTable:
 
     def crear_tabla_socios(self, socios):
         return ft.DataTable(
-            bgcolor="#40404040",
+            bgcolor="#35353535",
             border_radius=20,
             columns=[
                 ft.DataColumn(ft.Text("Control", weight="w700", size=16, font_family="Arial Black italic")),
