@@ -5,6 +5,7 @@ class MenuPage(ft.View):
         super().__init__(route="/menu")
         self.page = page
         self.bgcolor = "#F4F9FA"
+        
 
         self.controls = [
             ft.Container(
@@ -114,13 +115,13 @@ class MenuPage(ft.View):
         ]
 
     def containers_datos(self, icon, title, bgcolor):
-        return ft.Container(
+        containers = ft.Container(
             content=ft.Column(
                 [
                     ft.Row(
                         [
-                            ft.Icon(icon, size=90, color="#F4F9FAaa"),
-                            ft.Text(title, size=20, weight=ft.FontWeight.W_900, color="#F4F9FAaa"),
+                            ft.Icon(icon, size=90, color="#F4F9FA"),
+                            ft.Text(title, size=20, weight=ft.FontWeight.W_900, color="#F4F9FA"),
                         ],
                         alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                     ),
@@ -129,12 +130,12 @@ class MenuPage(ft.View):
             ),
             alignment=ft.alignment.center,
             width=230,
-            height=120,
-            border_radius=5,
-            bgcolor=bgcolor,
+            height=100,
+            border_radius=20,
+            bgcolor="#182241",
             padding=ft.padding.all(5),
-            blur=ft.Blur(10, 10, ft.BlurTileMode.REPEATED)  # Aplicando desenfoque
         )
+        return containers
 
     def show_logout_popup(self, e):
         self.page.dialog = ft.AlertDialog(
