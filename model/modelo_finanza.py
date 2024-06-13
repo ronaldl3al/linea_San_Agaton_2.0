@@ -9,7 +9,7 @@ class ModeloFinanza:
     def obtener_todas_finanzas(self):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM finanzas ORDER BY ID_finanzas ASC"
+        query = "SELECT * FROM finanzas ORDER BY numero_contr ASC"
         cursor.execute(query)
         finanzas = cursor.fetchall()
         cursor.close()

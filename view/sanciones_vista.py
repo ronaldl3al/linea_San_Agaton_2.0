@@ -20,7 +20,7 @@ class PDF(FPDF):
         lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
         for line in lines:
             self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
-            border = 0 
+            border = 0
         if ln > 0:
             self.ln(h)
 
@@ -289,8 +289,6 @@ class SancionesTable:
                 ft.DataColumn(ft.Text("Final de Sanción", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Monto", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Motivo de Sanción", weight="w700", size=16, font_family="Arial Black italic")),
-                
-                
                 ft.DataColumn(ft.Text("Acciones", weight="w800", size=19, font_family="Arial Black italic")),
             ],
             rows=self.crear_filas(sanciones),
@@ -313,12 +311,10 @@ class SancionesTable:
                     ft.DataCell(ft.Text(sancion['cedula'])),
                     ft.DataCell(ft.Text(sancion['nombre'])),
                     ft.DataCell(ft.Text(sancion['apellido'])),
-                    
                     ft.DataCell(ft.Text(sancion['inicio_sancion'])),
                     ft.DataCell(ft.Text(sancion['final_sancion'])),
                     ft.DataCell(ft.Text(sancion['monto'])),
                     ft.DataCell(ft.Text(sancion['motivo_sancion'])),
-                    
                     ft.DataCell(
                         ft.Row(
                             obtener_acciones(sancion)
@@ -355,7 +351,7 @@ class SancionesForm:
             border_color="#F4F9FA", 
             focused_border_color="#06F58E", 
             label="Motivo de Sanción", 
-            max_length=30, 
+            max_length=50, 
             width=600, 
             multiline= True,
             value=sancion['motivo_sancion'] if sancion and 'motivo_sancion' in sancion else "",
@@ -369,7 +365,7 @@ class SancionesForm:
             max_length=10, 
             width=110, 
             value=sancion['monto'] if sancion and 'monto' in sancion else "",
-            input_filter=ft.NumbersOnlyInputFilter()
+            on_change=self.validar_monto
         )
         inicio_sancion = ft.TextField(
             border_radius=13, 
@@ -459,6 +455,14 @@ class SancionesForm:
             e.control.error_text = "Solo se permiten letras"
             e.control.update()
 
+    def validar_monto(self, e):
+        if Validacion.validar_monto(e.control.value):
+            e.control.error_text = None
+            e.control.update()
+        else:
+            e.control.error_text = "Monto inválido"
+            e.control.update()
+
     def guardar_sancion(self, ID_sancion, cedula, motivo_sancion, monto, inicio_sancion, final_sancion, nombre, apellido):
         fecha_inicio_str = inicio_sancion.value if isinstance(inicio_sancion.value, str) else inicio_sancion.value.strftime('%Y-%m-%d')
         fecha_final_str = final_sancion.value if isinstance(final_sancion.value, str) else final_sancion.value.strftime('%Y-%m-%d')
@@ -467,7 +471,8 @@ class SancionesForm:
             Validacion.validar_cedula(cedula.value) and
             Validacion.validar_texto(motivo_sancion.value) and
             Validacion.validar_texto(nombre.value) and
-            Validacion.validar_texto(apellido.value)):
+            Validacion.validar_texto(apellido.value) and
+            Validacion.validar_monto(monto.value)):
             if ID_sancion:
                 self.accion(ID_sancion, cedula.value, motivo_sancion.value, monto.value, fecha_inicio_str, fecha_final_str, nombre.value, apellido.value)
             else:
@@ -483,6 +488,8 @@ class SancionesForm:
                 self.sanciones_page.mostrar_banner("El nombre no es válido. Solo se permiten letras y espacios.")
             if not Validacion.validar_texto(apellido.value):
                 self.sanciones_page.mostrar_banner("El apellido no es válido. Solo se permiten letras y espacios.")
+            if not Validacion.validar_monto(monto.value):
+                self.sanciones_page.mostrar_banner("El monto no es válido. Debe ser un número con dos decimales.")
 
 class Validacion:
     @staticmethod
@@ -499,8 +506,13 @@ class Validacion:
 
     @staticmethod
     def validar_texto(texto):
-        patron = r'^[a-zA-Z\s]+$'
+        patron = r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$'
         return re.match(patron, texto) is not None
+
+    @staticmethod
+    def validar_monto(monto):
+        patron = r'^\d+(\.\d{1,2})?$'
+        return re.match(patron, monto) is not None
 
 class Botones_nav:
     @staticmethod

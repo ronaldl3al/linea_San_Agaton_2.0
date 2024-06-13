@@ -507,7 +507,7 @@ class Validacion:
 
     @staticmethod
     def validar_texto(texto):
-        patron = r'^[a-zA-Z\s]+$'
+        patron = r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$'
         return re.match(patron, texto) is not None
 
     @staticmethod

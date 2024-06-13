@@ -9,7 +9,7 @@ class ModeloAvance:
     def obtener_todos_avances(self):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM avances ORDER BY ID_avance ASC"
+        query = "SELECT * FROM avances ORDER BY numero_control ASC"
         cursor.execute(query)
         avances = cursor.fetchall()
         cursor.close()

@@ -9,7 +9,7 @@ class ModeloSancion:
     def obtener_todas_sanciones(self):
         conexion = self.configuracion_bd.conectar()
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM sanciones ORDER BY ID_sancion ASC"
+        query = "SELECT * FROM sanciones ORDER BY final_sancion ASC"
         cursor.execute(query)
         sanciones = cursor.fetchall()
         cursor.close()

@@ -280,12 +280,12 @@ class FinanzasTable:
             bgcolor="#35353535",
             border_radius=20,
             columns=[
-                ft.DataColumn(ft.Text("ID Finanzas", weight="w700", size=16, font_family="Arial Black italic")),
+                ft.DataColumn(ft.Text("Número de Control", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Cédula", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Pagos Mensuales", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Impuestos Anuales", weight="w700", size=16, font_family="Arial Black italic")),
                 ft.DataColumn(ft.Text("Fecha de Pago", weight="w700", size=16, font_family="Arial Black italic")),
-                ft.DataColumn(ft.Text("Número de Control", weight="w700", size=16, font_family="Arial Black italic")),
+                
                 ft.DataColumn(ft.Text("Acciones", weight="w800", size=19, font_family="Arial Black italic")),
             ],
             rows=self.crear_filas(finanzas),
@@ -305,12 +305,12 @@ class FinanzasTable:
         return [
             ft.DataRow(
                 cells=[
-                    ft.DataCell(ft.Text(finanza['ID_finanzas'])),
+                    ft.DataCell(ft.Text(finanza['numero_contr'])),
                     ft.DataCell(ft.Text(finanza['cedula'])),
                     ft.DataCell(ft.Text(finanza['pagos_mensuales'])),
                     ft.DataCell(ft.Text(finanza['impuestos_anuales'])),
                     ft.DataCell(ft.Text(finanza['fecha_pago'])),
-                    ft.DataCell(ft.Text(finanza['numero_contr'])),
+                    
                     ft.DataCell(
                         ft.Row(
                             obtener_acciones(finanza)
@@ -462,7 +462,7 @@ class Validacion:
 
     @staticmethod
     def validar_texto(texto):
-        patron = r'^[a-zA-Z\s]+$'
+        patron = r'^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$'
         return re.match(patron, texto) is not None
 
 class Botones_nav:
