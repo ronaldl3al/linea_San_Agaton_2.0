@@ -2,8 +2,9 @@
 
 from model.modelo_socio import ModeloSocio
 
-# region SocioControlador Class
-# Clase que controla las operaciones relacionadas con los socios
+#region SocioControlador Class
+
+#controla las operaciones relacionadas con los socios
 class SocioControlador:
     def __init__(self):
         # Inicializa la instancia del modelo de socio

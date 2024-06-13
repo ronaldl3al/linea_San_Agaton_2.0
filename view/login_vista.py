@@ -10,7 +10,6 @@ class LoginPage(ft.View):
         self.bgcolor = "#F4F9FA"
         self.page.title = "INICIO DE SESION"
 
-        # Configurar la ventana para que no sea redimensionable
 
         self.page.window_min_height=740
         self.page.window_min_width=1380
@@ -26,7 +25,6 @@ class LoginPage(ft.View):
         self.vista_login()
 
     def vista_login(self):
-        # Logo y Título
         logo = ft.Text("Linea San Agatón", size=40, weight=ft.FontWeight.BOLD, color="#F4F9FA",font_family="Arial Black italic")
         bienvenido = ft.Text("¡Bienvenido de vuelta!", weight=ft.FontWeight.BOLD, size=20, color="#F4F9FA")
 
@@ -67,7 +65,7 @@ class LoginPage(ft.View):
             on_click=self.exit_app,
         )
 
-        # Layout
+        # diseño
         self.controls.append(
             ft.Container(
                 content=ft.Container(
@@ -86,7 +84,7 @@ class LoginPage(ft.View):
                         spacing=20,
                     ),
                     padding=ft.padding.all(20),
-                    width=550,  # Ancho ajustado para que coincida con el de socios
+                    width=550,  
                     bgcolor="#0D1223",
                     gradient=ft.LinearGradient(
                         begin=ft.alignment.center_left,
@@ -95,7 +93,7 @@ class LoginPage(ft.View):
                     ),
                     image_src="image\LOGO_SAN_AGATON_REMASTER1.png"
                 ),
-                alignment=ft.alignment.center_right,  # Alinear el contenedor al centro
+                alignment=ft.alignment.center_right,  
                 expand=True,
                 
                 bgcolor=ft.colors.TRANSPARENT,
@@ -126,7 +124,7 @@ class LoginPage(ft.View):
     def mostrar_banner(self, mensaje):
         self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
-            bgcolor="#eb3936",  # Color rojo pastel
+            bgcolor="#eb3936", 
             actions=[
                 ft.TextButton("CERRAR", on_click=lambda _: self.cerrar_banner(), style=ft.ButtonStyle(color=ft.colors.WHITE))
             ]

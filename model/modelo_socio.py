@@ -2,14 +2,14 @@
 
 from utils.db_config import ConfiguracionBaseDeDatos
 
-# region ModeloSocio Class
-# Clase que representa el modelo de datos para los socios
+#region ModeloSocio Class
+# Modelo de datos para los socios
 class ModeloSocio:
     def __init__(self):
         # Inicializa la configuración de la base de datos
         self.configuracion_bd = ConfiguracionBaseDeDatos()
     
-    # Método para obtener todos los socios
+    # Metodo para obtener todos los socios
     def obtener_todos_socios(self):
         conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor(dictionary=True)
@@ -20,7 +20,7 @@ class ModeloSocio:
         conexion.close()
         return socios
 
-    # Método para insertar un nuevo socio
+    # Metodo para insertar un nuevo socio
     def insertar_socio(self, cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento):
         conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()
@@ -32,7 +32,7 @@ class ModeloSocio:
         cursor.close()
         conexion.close()
 
-    # Método para actualizar un socio existente
+    # Metodo para actualizar un socio existente
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento):
         conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()
@@ -47,7 +47,7 @@ class ModeloSocio:
         cursor.close()
         conexion.close()
 
-    # Método para eliminar un socio
+    # Metodo para eliminar un socio
     def eliminar_socio(self, cedula):
         conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()

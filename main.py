@@ -13,9 +13,8 @@ import warnings
 # Ignorar advertencias de desaprobación
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
-# Función principal que se ejecuta al iniciar la aplicación
 def main(page: ft.Page):
-    # Función para manejar los cambios de ruta
+    # manejar los cambios de ruta
     def route_change(route):
         page.views.clear()  # Limpiar las vistas actuales
 
@@ -46,5 +45,6 @@ def main(page: ft.Page):
 # Para ejecutar la aplicación como una app de escritorio
 ft.app(target=main)
 
-# Para ejecutar la aplicación en el navegador (descomentar la siguiente línea)
+# Para ejecutar la aplicación en el navegador
+
 # ft.app(target=main, view=ft.WEB_BROWSER)

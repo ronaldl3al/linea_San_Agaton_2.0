@@ -6,23 +6,6 @@ from controller.auth_controlador import AuthControlador
 import re
 from datetime import datetime
 
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'Tabla de Datos de Finanzas', 0, 1, 'C')
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
-
-    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
-        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
-        for line in lines:
-            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
-            border = 0 
-        if ln > 0:
-            self.ln(h)
 
 class FinanzasPage(ft.View):
     def __init__(self, page):
@@ -37,9 +20,9 @@ class FinanzasPage(ft.View):
         self.rol = AuthControlador.obtener_rol()
         btn_agregar = None
         if self.rol in ["Admin", "Editor"]:
-            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40, style=ft.ButtonStyle(color="#06F58E"))
         elif self.rol == "Viewer":
-            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)
+            btn_agregar = ""  
 
         self.controls = [
             ft.Container(
@@ -234,13 +217,13 @@ class FinanzasPage(ft.View):
 
         for finanza in self.finanzas_data:
             pdf.set_font("Arial", size=14)
-            pdf.cell(0, 10, txt=f"ID Finanzas: {finanza['ID_finanzas']}", ln=True)
+            pdf.cell(0, 10, txt=f"Número de Control: {finanza['numero_contr']}", ln=True)
             pdf.set_font("Arial", 'B', size=10)
             pdf.cell(0, 10, txt=f"Cédula: {finanza['cedula']}", ln=True)
             pdf.cell(0, 10, txt=f"Pagos Mensuales: {finanza['pagos_mensuales']}", ln=True)
             pdf.cell(0, 10, txt=f"Impuestos Anuales: {finanza['impuestos_anuales']}", ln=True)
             pdf.cell(0, 10, txt=f"Fecha de Pago: {finanza['fecha_pago']}", ln=True)
-            pdf.cell(0, 10, txt=f"Número de Control: {finanza['numero_contr']}", ln=True)
+            
             
             pdf.ln(5)
         
@@ -485,3 +468,21 @@ class Botones_nav:
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Tabla de Datos de Finanzas', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
+        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
+        for line in lines:
+            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
+            border = 0 
+        if ln > 0:
+            self.ln(h)

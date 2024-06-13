@@ -6,29 +6,7 @@ from controller.auth_controlador import AuthControlador
 import re
 from datetime import datetime
 
-#region PDF Class
-# Clase para la generación de PDF
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'Tabla de Datos de Socios', 0, 1, 'C')
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
-
-    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
-        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
-        for line in lines:
-            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
-            border = 0 
-        if ln > 0:
-            self.ln(h)
-# endregion
-
-# region SociosPage Class
-# Clase que representa la página de socios
+#region SociosPage 
 class SociosPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/socios")
@@ -39,17 +17,16 @@ class SociosPage(ft.View):
         self.tabla_socios = SociosTable(self, self.socios_data)
         self.page.title = "SOCIOS"
         
-        # Obtener el rol del usuario autenticado
+        # rol del usuario autenticado
         self.rol = AuthControlador.obtener_rol()
 
-        # Definir el botón de agregar en una variable dependiendo del rol
         btn_agregar = None
-        if self.rol in ["Admin", "Editor"]:  # Asumiendo roles en mayúsculas como en la base de datos
-            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40)
+        if self.rol in ["Admin", "Editor"]:  
+            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=self.mostrar_bottomsheet_agregar, icon_size=40, style=ft.ButtonStyle(color="#06F58E"))
         elif self.rol == "Viewer":
-            btn_agregar = ft.IconButton(icon=ft.icons.ADD, on_click=None, icon_size=40)  # Deshabilitar botón
+            btn_agregar = ""  
 
-        # Controles y layout de la página
+        # Controles y diseño de la pagina
         self.controls = [
             ft.Container(
                 bgcolor="#111111",
@@ -129,7 +106,7 @@ class SociosPage(ft.View):
             ),
         ]
 
-        # Inicializar el BottomSheet para agregar/editar socios
+        # BottomSheet para agregar/editar socios
         self.bottom_sheet = ft.BottomSheet(
             ft.Container(),
             open=False,
@@ -138,23 +115,23 @@ class SociosPage(ft.View):
         )
         self.page.overlay.append(self.bottom_sheet)
 
-    # Método para obtener los datos de los socios
+    #  obtener los datos de los socios
     def obtener_datos_socios(self):
         return self.socio_controlador.obtener_todos_socios()
 
-    # Método para mostrar el BottomSheet para agregar un nuevo socio
+    #  mostrar el BottomSheet para agregar un nuevo socio
     def mostrar_bottomsheet_agregar(self, e):
         self.bottom_sheet.content = SociosForm(self, "Agregar Socio", self.guardar_socio).formulario
         self.bottom_sheet.open = True
         self.page.update()
 
-    # Método para mostrar el BottomSheet para editar un socio existente
+    #  mostrar el BottomSheet para editar un socio existente
     def mostrar_bottomsheet_editar(self, socio):
         self.bottom_sheet.content = SociosForm(self, "Editar Socio", self.actualizar_socio, socio).formulario
         self.bottom_sheet.open = True
         self.page.update()
 
-    # Método para confirmar la eliminación de un socio
+    #  confirmar la eliminación de un socio
     def confirmar_eliminar_socio(self, socio):
         self.page.dialog = ft.AlertDialog(
             bgcolor="#0D1223",
@@ -168,22 +145,22 @@ class SociosPage(ft.View):
         self.page.dialog.open = True
         self.page.update()
 
-    # Método para eliminar un socio y cerrar el diálogo
+    #  eliminar un socio y cerrar el diálogo
     def eliminar_y_cerrar_dialogo(self, cedula):
         self.eliminar_socio(cedula)
         self.cerrar_dialogo()
 
-    # Método para cerrar el diálogo de confirmación
+    #  cerrar el diálogo de confirmación
     def cerrar_dialogo(self):
         self.page.dialog.open = False
         self.page.update()
 
-    # Método para cerrar el BottomSheet
+    #  cerrar el BottomSheet
     def cerrar_bottomsheet(self, e=None):
         self.bottom_sheet.open = False
         self.page.update()
 
-    # Método para guardar un nuevo socio
+    #  guardar un nuevo socio
     def guardar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         try:
             if not cedula or not nombres or not apellidos:
@@ -196,7 +173,7 @@ class SociosPage(ft.View):
         except mysql.connector.Error as err:
             self.mostrar_banner(f"Error de base de datos: {err}")
 
-    # Método para actualizar un socio existente
+    #  actualizar un socio existente
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         try:
             if not cedula or not apellidos or not nombres:
@@ -209,7 +186,7 @@ class SociosPage(ft.View):
         except mysql.connector.Error as err:
             self.mostrar_banner(f"Error de base de datos: {err}")
 
-    # Método para eliminar un socio
+    #  eliminar un socio
     def eliminar_socio(self, cedula):
         try:
             self.socio_controlador.eliminar_socio(cedula)
@@ -218,13 +195,13 @@ class SociosPage(ft.View):
             self.mostrar_banner("No puedes eliminar este socio sin primero eliminar los vehículos asociados.")
         self.refrescar_datos()
 
-    # Método para mostrar un snackbar con un mensaje
+    #  mostrar un snackbar con un mensaje
     def mostrar_snackbar(self, mensaje):
         self.page.snack_bar = ft.SnackBar(ft.Text(mensaje), bgcolor="#F4F9FA")
         self.page.snack_bar.open = True
         self.page.update()
 
-    # Método para mostrar un banner con un mensaje de error
+    #  mostrar un banner con un mensaje de error
     def mostrar_banner(self, mensaje):
         self.page.banner = ft.AlertDialog(
             content=ft.Text(mensaje, color=ft.colors.WHITE),
@@ -236,19 +213,19 @@ class SociosPage(ft.View):
         self.page.banner.open = True
         self.page.update()
 
-    # Método para cerrar el banner de error
+    #  cerrar el banner de error
     def cerrar_banner(self):
         self.page.banner.open = False
         self.page.update()
 
-    # Método para refrescar los datos de la tabla de socios
+    #  refrescar los datos de la tabla de socios
     def refrescar_datos(self):
         self.socios_data = self.obtener_datos_socios()
         self.tabla_socios.actualizar_filas(self.socios_data)
         self.cerrar_bottomsheet()
         self.page.update()
 
-    # Método para exportar los datos de los socios a un archivo PDF
+    #  exportar los datos de los socios a un archivo PDF
     def exportar_pdf(self, e):
         pdf = PDF(orientation='L', unit='mm', format='A4')
         pdf.add_page()
@@ -275,7 +252,7 @@ class SociosPage(ft.View):
         pdf.output("reporte_socios.pdf")
         self.mostrar_snackbar("PDF generado correctamente")
 
-    # Método para mostrar el popup de cierre de sesión
+    #  mostrar el popup de cierre de sesión
     def show_logout_popup(self, e):
         self.page.dialog = ft.AlertDialog(
             title=ft.Text("Confirmar Cierre de Sesión"),
@@ -290,26 +267,24 @@ class SociosPage(ft.View):
         self.page.dialog.open = True
         self.page.update()
 
-    # Método para cerrar el diálogo de cierre de sesión
+    #  cerrar el diálogo de cierre de sesión
     def close_dialog(self, e):
         self.page.dialog.open = False
         self.page.update()
 
-    # Método para cerrar sesión y redirigir al login
+    #  cerrar sesión y redirigir al login
     def logout(self, e):
         self.page.dialog.open = False
         self.page.update()
         self.page.go("/login")
-# endregion
 
-# region SociosTable Class
-# Clase que representa la tabla de socios
+#region SociosTable 
 class SociosTable:
     def __init__(self, socios_page, socios_data):
         self.socios_page = socios_page
         self.data_table = self.crear_tabla_socios(socios_data)
 
-    # Método para crear la tabla de socios
+    #  crear la tabla de socios
     def crear_tabla_socios(self, socios):
         return ft.DataTable(
             bgcolor="#35353535",
@@ -328,7 +303,7 @@ class SociosTable:
             rows=self.crear_filas(socios),
         )
 
-    # Método para crear las filas de la tabla de socios
+    #  crear las filas de la tabla de socios
     def crear_filas(self, socios):
         rol = AuthControlador.obtener_rol()  # Obtener el rol del usuario autenticado
 
@@ -362,14 +337,12 @@ class SociosTable:
             ) for socio in socios
         ]
 
-    # Método para actualizar las filas de la tabla
+    #  actualizar las filas de la tabla
     def actualizar_filas(self, socios):
         self.data_table.rows = self.crear_filas(socios)
         self.data_table.update()
-# endregion
 
-# region BotonesNav Class
-# Clase que contiene los botones de navegación
+#region BotonesNav 
 class Botones_nav:
     @staticmethod
     def crear_botones_navegacion(page):
@@ -390,10 +363,8 @@ class Botones_nav:
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
-# endregion
 
-# region Validacion Class
-# Clase para validar los datos de entrada
+#region Validacion Class
 class Validacion:
     @staticmethod
     def validar_fecha(fecha):
@@ -417,17 +388,15 @@ class Validacion:
     def validar_rif(rif):
         patron = r'^[VEJPG]\d{7,10}$'
         return re.match(patron, rif) is not None
-# endregion
 
-# region SociosForm Class
-# Clase para el formulario de agregar/editar socios
+#region SociosForm Class
 class SociosForm:
     def __init__(self, socios_page, titulo, accion, socio=None):
         self.socios_page = socios_page
         self.accion = accion
         self.formulario = self.crear_formulario_socio(titulo, accion, socio)
 
-    # Método para crear el formulario de socio
+    #  crear el formulario de socio
     def crear_formulario_socio(self, titulo, accion, socio=None):
         control = ft.TextField(
             border_radius=13, 
@@ -508,7 +477,7 @@ class SociosForm:
             label="Fecha Nacimiento", 
             max_length=10, 
             width=140, 
-            hint_text="AAAA/MM/DD", 
+            hint_text="AAAA-MM-DD", 
             value=socio['fecha_nacimiento'] if socio else "",
             on_change=self.validar_fecha_nacimiento
         )
@@ -540,7 +509,7 @@ class SociosForm:
             e.control.error_text = None
             e.control.update()
         else:
-            e.control.error_text = "AA/MM/DD"
+            e.control.error_text = "AAAA-MM-DD"
             e.control.update()
 
     def validar_cedula(self, e):
@@ -567,7 +536,7 @@ class SociosForm:
             e.control.error_text = "Formato RIF inválido"
             e.control.update()
 
-    # Método para guardar los datos del socio
+    #  guardar los datos del socio
     def guardar_socio(self, cedula, nombres, apellidos, direccion, telefono, control, rif, fecha_nacimiento):
         fecha_str = fecha_nacimiento.value if isinstance(fecha_nacimiento.value, str) else fecha_nacimiento.value.strftime('%Y-%m-%d')
         if (Validacion.validar_fecha(fecha_str) and
@@ -578,7 +547,7 @@ class SociosForm:
             # Si la fecha y la cédula son válidas, proceder con la acción
             self.accion(cedula.value, nombres.value, apellidos.value, direccion.value, telefono.value, control.value, rif.value, fecha_str)
         else:
-            # Mostrar un banner de error si alguna validación falla
+            # banner de error si alguna validación falla
             if not Validacion.validar_fecha(fecha_str):
                 self.socios_page.mostrar_banner("La fecha de nacimiento no es válida. Debe estar en el formato 'aaaa-mm-dd'.")
             if not Validacion.validar_cedula(cedula.value):
@@ -589,4 +558,24 @@ class SociosForm:
                 self.socios_page.mostrar_banner("El apellido no es válido. Solo se permiten letras y espacios.")
             if not Validacion.validar_rif(rif.value):
                 self.socios_page.mostrar_banner("El RIF no es válido. Debe empezar por 'V', 'E', 'J', 'P', 'G' seguido de 7 a 10 dígitos.")
-# endregion
+
+#region PDF 
+
+# generación de PDF
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Tabla de Datos de Socios', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
+        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
+        for line in lines:
+            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
+            border = 0 
+        if ln > 0:
+            self.ln(h)
