@@ -32,6 +32,7 @@ class FinanzasPage(ft.View):
         self.finanza_controlador = FinanzaControlador()
         self.finanzas_data = self.obtener_datos_finanzas()
         self.tabla_finanzas = FinanzasTable(self, self.finanzas_data)
+        self.page.title = "FINANZAS"
 
         self.rol = AuthControlador.obtener_rol()
         btn_agregar = None
@@ -339,7 +340,8 @@ class FinanzasForm:
             max_length=16, 
             width=180, 
             value=finanza['cedula'] if finanza and 'cedula' in finanza else "",
-            on_change=self.validar_cedula
+            on_change=self.validar_cedula,
+            hint_text="V-/E-", 
         )
         pagos_mensuales = ft.TextField(
             border_radius=13, 

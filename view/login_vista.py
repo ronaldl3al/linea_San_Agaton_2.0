@@ -8,7 +8,7 @@ class LoginPage(ft.View):
         super().__init__(route="/login")
         self.page = page
         self.bgcolor = "#F4F9FA"
-        self.page.title = "Login Page"
+        self.page.title = "INICIO DE SESION"
 
         # Configurar la ventana para que no sea redimensionable
 
@@ -27,9 +27,8 @@ class LoginPage(ft.View):
 
     def vista_login(self):
         # Logo y Título
-        logo = ft.Text("Linea San Agaton", size=30, weight=ft.FontWeight.BOLD, color="#F4F9FA")
-        create_account_text = ft.Text("", size=24, weight=ft.FontWeight.BOLD, color="#F4F9FA")
-        welcome_back_text = ft.Text("¡Bienvenido de vuelta!", size=12, color="#F4F9FA")
+        logo = ft.Text("Linea San Agatón", size=40, weight=ft.FontWeight.BOLD, color="#F4F9FA",font_family="Arial Black italic")
+        bienvenido = ft.Text("¡Bienvenido de vuelta!", weight=ft.FontWeight.BOLD, size=20, color="#F4F9FA")
 
         # Campos de entrada
         self.username = ft.TextField(
@@ -61,12 +60,6 @@ class LoginPage(ft.View):
             on_click=self.login,
             bgcolor="#182241"
         )
-        clear_btn = ft.ElevatedButton(
-            text="Borrar",
-            color=ft.colors.RED,
-            bgcolor="#F4F9FA",
-            on_click=self.clear_data,
-        )
         exit_btn = ft.ElevatedButton(
             text="Salir",
             color=ft.colors.WHITE,
@@ -82,12 +75,11 @@ class LoginPage(ft.View):
                         [
                             logo,
                             ft.Container(height=20),
-                            create_account_text,
-                            welcome_back_text,
+                            bienvenido,
                             ft.Container(height=20),
                             self.username,
                             self.password,
-                            ft.Row([login_btn, clear_btn, exit_btn], alignment=ft.MainAxisAlignment.CENTER),
+                            ft.Row([login_btn, exit_btn], alignment=ft.MainAxisAlignment.CENTER),
                         ],
                         alignment=ft.MainAxisAlignment.CENTER,
                         horizontal_alignment=ft.CrossAxisAlignment.CENTER,
@@ -125,11 +117,6 @@ class LoginPage(ft.View):
         except mysql.connector.Error as err:
             self.mostrar_banner(f"Error de base de datos: {err}")
 
-    def clear_data(self, e):
-        self.username.value = ""
-        self.password.value = ""
-        self.username.update()
-        self.password.update()
     
     def mostrar_snackbar(self, mensaje):
         self.page.snack_bar = ft.SnackBar(ft.Text(mensaje), bgcolor="#F4F9FA")

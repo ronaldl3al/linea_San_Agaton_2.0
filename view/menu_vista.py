@@ -1,12 +1,15 @@
 import flet as ft
 
+#region MenuPage Class
+# Clase que representa la página del menú
 class MenuPage(ft.View):
     def __init__(self, page):
         super().__init__(route="/menu")
         self.page = page
         self.bgcolor = "#F4F9FA"
+        self.page.title = "INICIO"
         
-
+        # Controles y layout de la página
         self.controls = [
             ft.Container(
                 bgcolor="#111111",
@@ -16,7 +19,7 @@ class MenuPage(ft.View):
                     colors=["#0D1223", "#182241"]
                 ),
                 border_radius=20,
-                content = ft.Row(
+                content=ft.Row(
                     [
                         ft.Row(
                             [
@@ -49,8 +52,6 @@ class MenuPage(ft.View):
                     ],
                     alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
                 ),
-
-
                 padding=20
             ),
             ft.Container(
@@ -114,6 +115,7 @@ class MenuPage(ft.View):
             )
         ]
 
+    # Metodo para crear contenedores
     def containers_datos(self, icon, title, bgcolor):
         containers = ft.Container(
             content=ft.Column(
@@ -137,9 +139,10 @@ class MenuPage(ft.View):
         )
         return containers
 
+    # Metodo para mostrar el popup de cierre de sesión
     def show_logout_popup(self, e):
         self.page.dialog = ft.AlertDialog(
-            bgcolor= "#0C1222",
+            bgcolor="#0C1222",
             title=ft.Text("Confirmar Cierre de Sesión"),
             content=ft.Text("¿Está seguro de que desea cerrar sesión?"),
             actions=[
@@ -151,32 +154,37 @@ class MenuPage(ft.View):
         self.page.dialog.open = True
         self.page.update()
 
+    # Metodo para cerrar el diálogo de cierre de sesión
     def close_dialog(self, e):
         self.page.dialog.open = False
         self.page.update()
 
+    # Metodo para cerrar sesión y redirigir al login
     def logout(self, e):
         self.page.dialog.open = False
         self.page.update()
         self.page.go("/login")
+# endregion
 
+#region BotonesNav Class
 class BotonesNav:
     @staticmethod
     def crear_botones_navegacion(page):
         return ft.Row(
             [
-                ft.TextButton("INICIO", scale=1.2,icon=ft.icons.HOME,style=ft.ButtonStyle(color="#F4F9FA"),   on_click=lambda _: page.go("/menu"), ),
-                ft.VerticalDivider(width=2.5,),
-                ft.TextButton("SOCIOS", scale=1.2,icon=ft.icons.PEOPLE_OUTLINE,  on_click=lambda _: page.go("/socios")),
-                ft.VerticalDivider(width=2.5,),
-                ft.TextButton("VEHICULOS", scale=1.2,icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
-                ft.VerticalDivider(width=2.5,),
-                ft.TextButton("AVANCES", scale=1.2,icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
-                ft.VerticalDivider(width=2.5,),
-                ft.TextButton("SANCIONES", scale=1.2,icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
-                ft.VerticalDivider(width=2.5,),
-                ft.TextButton("FINANZAS", scale=1.2,icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
-                ft.VerticalDivider(width=40,),
+                ft.TextButton("INICIO", scale=1.2, icon=ft.icons.HOME, style=ft.ButtonStyle(color="#F4F9FA"), on_click=lambda _: page.go("/menu")),
+                ft.VerticalDivider(width=2.5),
+                ft.TextButton("SOCIOS", scale=1.2, icon=ft.icons.PEOPLE_OUTLINE, on_click=lambda _: page.go("/socios")),
+                ft.VerticalDivider(width=2.5),
+                ft.TextButton("VEHICULOS", scale=1.2, icon=ft.icons.LOCAL_TAXI_OUTLINED, on_click=lambda _: page.go("/vehiculos")),
+                ft.VerticalDivider(width=2.5),
+                ft.TextButton("AVANCES", scale=1.2, icon=ft.icons.WORK_OUTLINE, on_click=lambda _: page.go("/avances")),
+                ft.VerticalDivider(width=2.5),
+                ft.TextButton("SANCIONES", scale=1.2, icon=ft.icons.REPORT_OUTLINED, on_click=lambda _: page.go("/sanciones")),
+                ft.VerticalDivider(width=2.5),
+                ft.TextButton("FINANZAS", scale=1.2, icon=ft.icons.PAYMENTS_OUTLINED, on_click=lambda _: page.go("/finanzas")),
+                ft.VerticalDivider(width=40),
             ],
             alignment=ft.MainAxisAlignment.CENTER
         )
+

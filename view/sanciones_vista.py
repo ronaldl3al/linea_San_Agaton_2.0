@@ -32,6 +32,7 @@ class SancionesPage(ft.View):
         self.sancion_controlador = SancionControlador()
         self.sanciones_data = self.obtener_datos_sanciones()
         self.tabla_sanciones = SancionesTable(self, self.sanciones_data)
+        self.page.title = "SANCIONES"
 
         self.rol = AuthControlador.obtener_rol()
         btn_agregar = None

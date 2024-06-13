@@ -9,12 +9,17 @@ from view.avances_vista import AvancesPage
 from view.sanciones_vista import SancionesPage
 from view.finanzas_vista import FinanzasPage
 import warnings
+
+# Ignorar advertencias de desaprobación
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
+# Función principal que se ejecuta al iniciar la aplicación
 def main(page: ft.Page):
+    # Función para manejar los cambios de ruta
     def route_change(route):
-        page.views.clear()
+        page.views.clear()  # Limpiar las vistas actuales
 
+        # Comprobar la ruta actual y agregar la vista correspondiente
         if page.route == "/login":
             page.views.append(LoginPage(page))
         elif page.route == "/menu":
@@ -30,13 +35,16 @@ def main(page: ft.Page):
         elif page.route == "/finanzas":
             page.views.append(FinanzasPage(page))
 
-        page.update()
+        page.update()  # Actualizar la página para reflejar los cambios
 
+    # Asignar la función route_change al evento on_route_change
     page.on_route_change = route_change
+
+    # Establecer la ruta inicial a "/login"
     page.go("/login")
 
 # Para ejecutar la aplicación como una app de escritorio
 ft.app(target=main)
 
-# Para ejecutar la aplicación en el navegador
-#ft.app(target=main, view=ft.WEB_BROWSER)
+# Para ejecutar la aplicación en el navegador (descomentar la siguiente línea)
+# ft.app(target=main, view=ft.WEB_BROWSER)

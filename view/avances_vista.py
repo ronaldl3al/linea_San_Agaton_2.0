@@ -32,6 +32,7 @@ class AvancesPage(ft.View):
         self.avance_controlador = AvanceControlador()
         self.avances_data = self.obtener_datos_avances()
         self.tabla_avances = AvancesTable(self, self.avances_data)
+        self.page.title = "AVANCES"
 
         self.rol = AuthControlador.obtener_rol()
         btn_agregar = None
@@ -385,8 +386,8 @@ class AvancesForm:
             border_color="#F4F9FA", 
             focused_border_color="#06F58E", 
             label="Teléfono", 
-            max_length=15, 
-            width=175, 
+            max_length=11, 
+            width=170, 
             prefix_text="+58 ", 
             input_filter=ft.NumbersOnlyInputFilter(), 
             hint_text="414 1234567", 
@@ -400,7 +401,8 @@ class AvancesForm:
             width=140, 
             max_length=15, 
             value=avance['rif'] if avance and 'rif' in avance else "",
-            on_change=self.validar_rif
+            on_change=self.validar_rif,
+            hint_text="V121233211",
         )
         fecha_nacimiento = ft.TextField(
             border_radius=13, 
@@ -408,7 +410,7 @@ class AvancesForm:
             focused_border_color="#06F58E", 
             label="Fecha Nacimiento", 
             max_length=10, 
-            width=130, 
+            width=135, 
             hint_text="AAAA-MM-DD", 
             value=avance['fecha_nacimiento'] if avance and 'fecha_nacimiento' in avance else "",
             on_change=self.validar_fecha_nacimiento

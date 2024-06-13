@@ -2,33 +2,39 @@
 
 from utils.db_config import ConfiguracionBaseDeDatos
 
+# region ModeloSocio Class
+# Clase que representa el modelo de datos para los socios
 class ModeloSocio:
     def __init__(self):
+        # Inicializa la configuración de la base de datos
         self.configuracion_bd = ConfiguracionBaseDeDatos()
     
+    # Método para obtener todos los socios
     def obtener_todos_socios(self):
-        conexion = self.configuracion_bd.conectar()
+        conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor(dictionary=True)
-        query = "SELECT * FROM socio  ORDER BY numero_control ASC "
+        query = "SELECT * FROM socio ORDER BY numero_control ASC"
         cursor.execute(query)
-        socios = cursor.fetchall()
+        socios = cursor.fetchall()  # Obtener todos los registros
         cursor.close()
         conexion.close()
         return socios
 
+    # Método para insertar un nuevo socio
     def insertar_socio(self, cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento):
-        conexion = self.configuracion_bd.conectar()
+        conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()
         query = """
         INSERT INTO socio (cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
         cursor.execute(query, (cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento))
-        conexion.commit()
+        conexion.commit()  # Confirmar la transacción
         cursor.close()
         conexion.close()
 
+    # Método para actualizar un socio existente
     def actualizar_socio(self, cedula, nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento):
-        conexion = self.configuracion_bd.conectar()
+        conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()
         query = """
         UPDATE socio 
@@ -37,15 +43,17 @@ class ModeloSocio:
         WHERE cedula = %s
         """
         cursor.execute(query, (nombres, apellidos, direccion, numero_telefono, numero_control, rif, fecha_nacimiento, cedula))
-        conexion.commit()
+        conexion.commit()  # Confirmar la transacción
         cursor.close()
         conexion.close()
 
+    # Método para eliminar un socio
     def eliminar_socio(self, cedula):
-        conexion = self.configuracion_bd.conectar()
+        conexion = self.configuracion_bd.conectar()  # Conectar a la base de datos
         cursor = conexion.cursor()
         query = "DELETE FROM socio WHERE cedula = %s"
         cursor.execute(query, (cedula,))
-        conexion.commit()
+        conexion.commit()  # Confirmar la transacción
         cursor.close()
         conexion.close()
+# endregion

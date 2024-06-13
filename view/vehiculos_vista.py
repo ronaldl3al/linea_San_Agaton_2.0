@@ -32,6 +32,7 @@ class VehiculosPage(ft.View):
         self.vehiculo_controlador = VehiculoControlador()
         self.vehiculos_data = self.obtener_datos_vehiculos()
         self.tabla_vehiculos = VehiculosTable(self, self.vehiculos_data)
+        self.page.title = "VEHICULOS"
         
         self.rol = AuthControlador.obtener_rol()
 
@@ -145,7 +146,7 @@ class VehiculosPage(ft.View):
         self.page.dialog = ft.AlertDialog(
             bgcolor="#0D1223",
             title=ft.Text("Confirmar eliminación"),
-            content=ft.Text(f"¿Estás seguro de que deseas eliminar el vehículo con ID {vehiculo['ID_vehiculo']}?"),
+            content=ft.Text(f"¿Estás seguro de que deseas eliminar el vehículo asociado al control {vehiculo['numero_control']}?"),
             actions=[
                 ft.TextButton("Cancelar", on_click=lambda _: self.cerrar_dialogo()),
                 ft.TextButton("Eliminar", on_click=lambda _: self.eliminar_y_cerrar_dialogo(vehiculo['ID_vehiculo']), style=ft.ButtonStyle(color="red"))
@@ -234,10 +235,10 @@ class VehiculosPage(ft.View):
         
         for vehiculo in self.vehiculos_data:
             pdf.set_font("Arial", size=14)
-            pdf.cell(0, 10, txt=f"ID Vehículo: {vehiculo['ID_vehiculo']}", ln=True)
+            pdf.cell(0, 10, txt=f"Control: {vehiculo['numero_control']}", ln=True)
             pdf.set_font("Arial", 'B', size=10)
             pdf.cell(0, 10, txt=f"Cédula: {vehiculo['cedula']}", ln=True)
-            pdf.cell(0, 10, txt=f"Control: {vehiculo['numero_control']}", ln=True)
+    
             pdf.cell(0, 10, txt=f"Marca: {vehiculo['marca']}", ln=True)
             pdf.cell(0, 10, txt=f"Modelo: {vehiculo['modelo']}", ln=True)
             pdf.cell(0, 10, txt=f"Año: {vehiculo['ano']}", ln=True)
@@ -360,7 +361,7 @@ class VehiculosForm:
             border_radius=13,
             border_color="#F4F9FA",
             focused_border_color="#06F58E",
-            label="Cédula",
+            label="Cédula del Socio",
             max_length=11,
             width=180,
             hint_text="V-/E-",
@@ -373,7 +374,7 @@ class VehiculosForm:
             focused_border_color="#06F58E",
             label="Control",
             max_length=2,
-            width=80,
+            width=100,
             input_filter=ft.NumbersOnlyInputFilter(),
             value=vehiculo['numero_control'] if vehiculo else ""
         )
@@ -383,17 +384,17 @@ class VehiculosForm:
             focused_border_color="#06F58E",
             label="Marca",
             max_length=30,
-            value=vehiculo['marca'] if vehiculo else "",
-            on_change=self.validar_texto
+            width=280,
+            value=vehiculo['marca'] if vehiculo else ""
         )
         modelo = ft.TextField(
             border_radius=13,
             border_color="#F4F9FA",
             focused_border_color="#06F58E",
             label="Modelo",
+            width=280,
             max_length=30,
-            value=vehiculo['modelo'] if vehiculo else "",
-            on_change=self.validar_texto
+            value=vehiculo['modelo'] if vehiculo else ""
         )
         ano = ft.TextField(
             border_radius=13,
@@ -401,7 +402,7 @@ class VehiculosForm:
             focused_border_color="#06F58E",
             label="Año",
             max_length=4,
-            width=100,
+            width=120,
             input_filter=ft.NumbersOnlyInputFilter(),
             value=str(vehiculo['ano']) if vehiculo else "",
             on_change=self.validar_ano
@@ -419,8 +420,8 @@ class VehiculosForm:
 
         formulario = ft.Container(
             ft.Column([
-                ft.Row([numero_control, cedula, modelo ], spacing=10),
-                ft.Row([marca,ano, placa], spacing=10),
+                ft.Row([numero_control, cedula, marca ], spacing=10),
+                ft.Row([modelo,ano, placa], spacing=10),
                 ft.Row(
                     [
                         ft.TextButton("Cancelar", icon=ft.icons.CANCEL, style=ft.ButtonStyle(color="#eb3936"), on_click=lambda _: self.vehiculos_page.cerrar_bottomsheet()),
@@ -459,7 +460,7 @@ class VehiculosForm:
             e.control.error_text = None
             e.control.update()
         else:
-            e.control.error_text = "Formato Año inválido"
+            e.control.error_text = "Año inválido"
             e.control.update()
 
     def validar_placa(self, e):
@@ -472,8 +473,6 @@ class VehiculosForm:
 
     def guardar_vehiculo(self, id_vehiculo, cedula, numero_control, marca, modelo, ano, placa):
         if (Validacion.validar_cedula(cedula.value) and
-            Validacion.validar_texto(marca.value) and
-            Validacion.validar_texto(modelo.value) and
             Validacion.validar_ano(ano.value) and
             Validacion.validar_placa(placa.value)):
             if id_vehiculo is not None:
@@ -483,10 +482,6 @@ class VehiculosForm:
         else:
             if not Validacion.validar_cedula(cedula.value):
                 self.vehiculos_page.mostrar_banner("La cédula no es válida. Debe ser 'V-' o 'E-' seguido de 7 a 9 dígitos.")
-            if not Validacion.validar_texto(marca.value):
-                self.vehiculos_page.mostrar_banner("La marca no es válida. Solo se permiten letras y espacios.")
-            if not Validacion.validar_texto(modelo.value):
-                self.vehiculos_page.mostrar_banner("El modelo no es válido. Solo se permiten letras y espacios.")
             if not Validacion.validar_ano(ano.value):
                 self.vehiculos_page.mostrar_banner("El año no es válido. Debe ser un año de 4 dígitos.")
             if not Validacion.validar_placa(placa.value):
