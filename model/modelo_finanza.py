@@ -1,5 +1,5 @@
 # modelos/modelo_finanza.py
-
+from fpdf import FPDF
 from utils.db_config import ConfiguracionBaseDeDatos
 
 class ModeloFinanza:
@@ -49,3 +49,23 @@ class ModeloFinanza:
         conexion.commit()
         cursor.close()
         conexion.close()
+
+
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Tabla de Datos de Finanzas', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'C')
+
+    def celda_multiple(self, w, h, text, border=0, ln=0, align='', fill=False):
+        lines = self.multi_cell(w, h, text, border=0, ln=0, align='', fill=False, split_only=True)
+        for line in lines:
+            self.cell(w, h, line, border=border, ln=2, align=align, fill=fill)
+            border = 0 
+        if ln > 0:
+            self.ln(h)
