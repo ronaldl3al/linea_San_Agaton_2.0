@@ -1,140 +1,147 @@
 import flet as ft
 from controller.auth_controlador import AuthControlador
 import mysql.connector.errors
-
+from utils.helpers import mostrar_mensaje
+from utils.colors import Colores
 
 class LoginPage(ft.View):
     def __init__(self, page: ft.Page):
         super().__init__(route="/login")
         self.page = page
-        self.bgcolor = "#F4F9FA"
-        self.page.title = "INICIO DE SESION"
-
-
-        self.page.window_min_height=740
-        self.page.window_min_width=1380
-        self.page.window_max_height=740
-        self.page.window_max_width=1380
-        self.page.window_maximized=True
-        self.page.window_maximizable=True
-        
-
-
-
+        self.bgcolor = Colores.NEGRO
+        self.page.title = "INICIO DE SESIÓN"
         self.auth_controlador = AuthControlador()
         self.vista_login()
 
-    def vista_login(self):
-        logo = ft.Text("Linea San Agatón", size=40, weight=ft.FontWeight.BOLD, color="#F4F9FA",font_family="Arial Black italic")
-        bienvenido = ft.Text("¡Bienvenido de vuelta!", weight=ft.FontWeight.BOLD, size=20, color="#F4F9FA")
+    def nombre_login(self):
+        return ft.Text(
+            "Linea San Agatón",
+            size=40,
+            weight=ft.FontWeight.BOLD,
+            color=Colores.BLANCO,
+            font_family="Arial Black italic",
+        )
 
-        # Campos de entrada
+    def texto_bienvenida(self):
+        return ft.Text(
+            "¡Bienvenido de vuelta!",
+            weight=ft.FontWeight.BOLD,
+            size=20,
+            color=Colores.BLANCO,
+        )
+
+    def campos_texto(self):
         self.username = ft.TextField(
             label="Usuario",
+            label_style=ft.TextStyle(color=Colores.BLANCO, size=20),
+            text_style=ft.TextStyle(color=ft.colors.WHITE),
             filled=True,
-            border_color="#F4F9FA",
+            border_color=Colores.BLANCO,
             bgcolor=ft.colors.TRANSPARENT,
             width=300,
             height=50,
             border_radius=20,
             prefix_icon=ft.icons.LOGIN,
+            focused_border_color=Colores.GRIS,
+            focus_color=Colores.GRIS,
         )
         self.password = ft.TextField(
             label="Contraseña",
+            label_style=ft.TextStyle(color=Colores.BLANCO, size=20),
+            text_style=ft.TextStyle(color=ft.colors.WHITE),
             password=True,
             filled=True,
-            border_color="#F4F9FA",
+            border_color=Colores.BLANCO,
             bgcolor=ft.colors.TRANSPARENT,
             width=300,
             height=50,
             border_radius=20,
             can_reveal_password=True,
             prefix_icon=ft.icons.PASSWORD,
+            focused_border_color=Colores.GRIS,
+            focus_color=Colores.GRIS,
         )
+        return self.username, self.password
 
-        # Botones
-        login_btn = ft.ElevatedButton(
-            content=ft.Text('INICIAR'),
+    def boton_login(self):
+        return ft.ElevatedButton(
+            text="INICIAR",
             on_click=self.login,
-            bgcolor="#182241"
-        )
-        exit_btn = ft.ElevatedButton(
-            text="Salir",
+            bgcolor=Colores.GRIS,
             color=ft.colors.WHITE,
-            bgcolor=ft.colors.RED,
-            on_click=self.exit_app,
         )
 
-        # diseño
-        self.controls.append(
-            ft.Container(
-                content=ft.Container(
-                    content=ft.Column(
-                        [
-                            logo,
-                            ft.Container(height=20),
-                            bienvenido,
-                            ft.Container(height=20),
-                            self.username,
-                            self.password,
-                            ft.Row([login_btn, exit_btn], alignment=ft.MainAxisAlignment.CENTER),
-                        ],
+    def contenedor_login(self):
+        logo = self.nombre_login()
+        texto_bienvenida = self.texto_bienvenida()
+        username, password = self.campos_texto()
+        boton_login = self.boton_login()
+
+        return ft.Container(
+            content=ft.Column(
+                [
+                    logo,
+                    ft.Container(height=30),
+                    texto_bienvenida,
+                    ft.Container(height=20),
+                    username,
+                    password,
+                    ft.Row(
+                        [boton_login],
                         alignment=ft.MainAxisAlignment.CENTER,
-                        horizontal_alignment=ft.CrossAxisAlignment.CENTER,
-                        spacing=20,
                     ),
-                    padding=ft.padding.all(20),
-                    width=550,  
-                    bgcolor="#0D1223",
-                    gradient=ft.LinearGradient(
-                        begin=ft.alignment.center_left,
-                        end=ft.alignment.center_right,
-                        colors=["#0D1223", "#182241"]
-                    ),
-                    image_src="image\LOGO_SAN_AGATON_REMASTER1.png"
-                ),
-                alignment=ft.alignment.center_right,  
-                expand=True,
-                
-                bgcolor=ft.colors.TRANSPARENT,
-                image_src="image\IMG_20240610_172030_545 (1).jpg-1.png",
-                border_radius=20,
+                ],
+                alignment=ft.MainAxisAlignment.CENTER,
+                horizontal_alignment=ft.CrossAxisAlignment.CENTER,
+                spacing=20,
+            ),
+            padding=30,
+            width=425,
+            height=590,
+            border_radius=20,
+            alignment=ft.alignment.center,
+            blur=ft.Blur(sigma_x=0, sigma_y=200),
+            border=ft.Border(
+                left=ft.BorderSide(color=Colores.BLANCO, width=1.5),
+                top=ft.BorderSide(color=Colores.BLANCO, width=1.5),
+                right=ft.BorderSide(color=Colores.BLANCO, width=1.5),
+                bottom=ft.BorderSide(color=Colores.BLANCO, width=1.5),
             ),
         )
+
+    def contenedor_fondo(self, contenedor_login: ft.Container):
+        contenedor_imagen = ft.Container(
+            content=ft.Image(
+                src="https://iili.io/3AxmI0N.png",
+                fit=ft.ImageFit.COVER,
+            ),
+            border_radius=20,
+            expand=True,
+        )
+        contenedor_formulario = ft.Container(
+            content=ft.Row(
+                [contenedor_login],
+                alignment=ft.MainAxisAlignment.START,
+            ),
+            padding=ft.padding.only(left=20, right=20, top=20),
+        )
+        stack = ft.Stack([contenedor_imagen, contenedor_formulario])
+        return ft.Container(content=stack, expand=True)
+
+    def vista_login(self):
+        contenedor_login = self.contenedor_login()
+        contenedor_fondo = self.contenedor_fondo(contenedor_login)
+        self.controls.append(contenedor_fondo)
 
     def login(self, e):
         username = self.username.value
         password = self.password.value
-        
+
         try:
             rol = self.auth_controlador.autenticar(username, password)
             if rol:
                 self.page.go("/menu")
             else:
-                self.mostrar_snackbar("Datos ingresados incorrectos")
+                mostrar_mensaje(self.page, "Credenciales incorrectas", tipo="error")
         except mysql.connector.Error as err:
-            self.mostrar_banner(f"Error de base de datos: {err}")
-
-    
-    def mostrar_snackbar(self, mensaje):
-        self.page.snack_bar = ft.SnackBar(ft.Text(mensaje), bgcolor="#F4F9FA")
-        self.page.snack_bar.open = True
-        self.page.update()
-
-    def mostrar_banner(self, mensaje):
-        self.page.banner = ft.AlertDialog(
-            content=ft.Text(mensaje, color=ft.colors.WHITE),
-            bgcolor="#eb3936", 
-            actions=[
-                ft.TextButton("CERRAR", on_click=lambda _: self.cerrar_banner(), style=ft.ButtonStyle(color=ft.colors.WHITE))
-            ]
-        )
-        self.page.banner.open = True
-        self.page.update()
-
-    def cerrar_banner(self):
-        self.page.banner.open = False
-        self.page.update()
-
-    def exit_app(self, e):
-        self.page.window_close()
+            mostrar_mensaje(self.page, f"Error de base de datos: {err}", tipo="error")

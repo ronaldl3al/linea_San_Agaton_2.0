@@ -43,8 +43,8 @@ def main(page: ft.Page):
     page.go("/login")
 
 # Para ejecutar la aplicación como una app de escritorio
-ft.app(target=main)
+#ft.app(target=main)
 
 # Para ejecutar la aplicación en el navegador
 
-# ft.app(target=main, view=ft.WEB_BROWSER)
+ft.app(target=main, view=ft.WEB_BROWSER)
